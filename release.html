@@ -115,8 +115,10 @@ body.has-wallpaper::before{
 .cat-chip.money{--c:#C9A98A}.cat-chip.health{--c:#9CBFA8}.cat-chip.relation{--c:#B8A6C9}
 .cat-chip.study{--c:#9FB6D0}.cat-chip.career{--c:#C9B49A}.cat-chip.self{--c:#C9A6B8}.cat-chip.other{--c:#B0A8AC}
 .cat-chip.sel{background:var(--c);color:#fff;border-color:var(--c)}
-.cat-chip{color:#3F3540;background:rgba(255,255,255,.82);font-weight:500;opacity:1}
-.cat-chip.sel{color:#fff}
+.cat-add{margin-left:auto;font-size:12px;color:var(--sub);cursor:pointer;letter-spacing:.5px}
+.card-title .muted{margin-left:8px;margin-right:auto}
+.cat-add-row{gap:8px;align-items:center}
+.cat-add-row .input{flex:1}
 .cat-chip.sel::before{background:#fff}
 /* 目标列表 */
 .target-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.5);margin-bottom:10px;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s}
@@ -380,7 +382,10 @@ const CATS=[
   {k:'money',n:'金钱'},{k:'health',n:'健康'},{k:'relation',n:'关系'},
   {k:'study',n:'学业'},{k:'career',n:'事业'},{k:'self',n:'自我'},{k:'other',n:'其他'}
 ];
-const catName=k=>(CATS.find(c=>c.k===k)||CATS[6]).n;
+function allCats(){ return CATS.concat(state.customCats||[]); }
+const catName=k=>(allCats().find(c=>c.k===k)||{n:'其他'}).n;
+function catColorOf(k){ return c_catColor(k); }
+function c_catColor(k){ const c=(state.customCats||[]).find(x=>x.k===k); return (c&&c.color)||catColor[k]||'#B0A8AC'; }
 const catColor={money:'#C9A98A',health:'#9CBFA8',relation:'#B8A6C9',study:'#9FB6D0',career:'#C9B49A',self:'#C9A6B8',other:'#B0A8AC'};
 /* 圣多纳九大情绪层级 AGFLAP→CAP（高层用绿，低层用暖色） */
 const EMO_LEVELS=[
@@ -407,7 +412,7 @@ function load(){
 }
 function migrate(s){
   const base={profile:{name:'旅人',avatar:''},theme:'pink',wallpaper:'',font:'sans',cardAlpha:80,
-    targets:[],records:[],diaries:[],activeTargetId:null,filterCat:'all',calMonth:null,pendingEmotion:'',pendingLevel:'',customEmos:[]};
+    targets:[],records:[],diaries:[],activeTargetId:null,filterCat:'all',calMonth:null,pendingEmotion:'',pendingLevel:'',customEmos:[],customCats:[]};
   const m=Object.assign(base,s);
   (m.records||[]).forEach(r=>{if(!r.time)r.time='早前';});
   /* 清掉已删除目标留下的孤儿记录 */
@@ -642,14 +647,18 @@ function renderHome(){
 /* ========== 目标页 ========== */
 function renderTarget(){
   const el=document.getElementById('page-target');
-  const cats=['all',...CATS.map(c=>c.k)];
+  const cats=['all',...allCats().map(c=>c.k)];
   const filter=state.filterCat||'all';
   const shown=state.targets.filter(t=>filter==='all'||t.cat===filter);
   el.innerHTML=`
     <div class="card">
-      <div class="card-title">新建目标 <span class="muted">选一个分类</span></div>
+      <div class="card-title">新建目标 <span class="muted">选一个分类</span><span class="cat-add" id="addCatBtn">＋ 增加分类</span></div>
       <div class="cat-picker" id="newCatPicker">
-        ${CATS.map(c=>`<span class="cat-chip ${c.k} ${c.k==='money'?'sel':''}" data-cat="${c.k}">${c.n}</span>`).join('')}
+        ${allCats().map(c=>`<span class="cat-chip ${c.k} ${c.k==='money'?'sel':''}" data-cat="${c.k}" style="--c:${catColorOf(c.k)}">${c.n}</span>`).join('')}
+      </div>
+      <div class="cat-add-row" id="addCatRow" style="display:none">
+        <input class="input" id="addCatInput" placeholder="新分类名字，比如：外貌" maxlength="6">
+        <button class="add-btn" id="addCatSave">＋</button>
       </div>
       <div class="add-row" style="margin-top:12px">
         <input class="input" id="targetInput" placeholder="写下你正在面对的目标…" maxlength="40">
@@ -673,6 +682,25 @@ function renderTarget(){
     if(!v){toast('先写下目标');return;}
     const t={id:uid(),text:v,cat:newCat,createdAt:Date.now()};
     state.targets.push(t);state.activeTargetId=t.id;save();inp.value='';renderTarget();toast('已添加，并设为当前目标');};
+  const addCatBtn=document.getElementById('addCatBtn');
+  const addCatRow=document.getElementById('addCatRow');
+  const addCatInput=document.getElementById('addCatInput');
+  if(addCatBtn)addCatBtn.onclick=()=>{
+    const on=addCatRow.style.display!=='none';
+    addCatRow.style.display=on?'none':'flex';
+    if(!on)setTimeout(()=>addCatInput.focus(),50);
+  };
+  const saveCat=()=>{
+    const v=(addCatInput.value||'').trim();
+    if(!v){toast('先写个分类名字');return;}
+    if(allCats().some(c=>c.n===v)){toast('这个分类已经有了');return;}
+    const palette=['#C9A98A','#9CBFA8','#B8A6C9','#9FB6D0','#C9B49A','#C9A6B8','#B0A8AC','#A9B7C6','#C6A9A9'];
+    state.customCats=state.customCats||[];
+    state.customCats.push({k:'c'+uid(),n:v,color:palette[state.customCats.length%palette.length]});
+    save();renderTarget();toast('分类已添加');
+  };
+  if(document.getElementById('addCatSave'))document.getElementById('addCatSave').onclick=saveCat;
+  if(addCatInput)addCatInput.addEventListener('keydown',e=>{if(e.key==='Enter')saveCat();});
   document.getElementById('targetAddBtn').onclick=add;
   document.getElementById('targetInput').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
   document.querySelectorAll('.filter-chip').forEach(f=>f.onclick=()=>{state.filterCat=f.dataset.f;save();renderTarget();});
@@ -690,7 +718,7 @@ function renderTarget(){
             <span class="target-count">已释放 ${targetCount(t.id)}</span>
           </div>
           <div class="cat-edit" id="catEdit-${t.id}">
-            ${CATS.map(c=>`<span class="cat-chip ${c.k}" data-cat="${c.k}">${c.n}</span>`).join('')}
+            ${allCats().map(c=>`<span class="cat-chip ${c.k}" data-cat="${c.k}" style="--c:${catColorOf(c.k)}">${c.n}</span>`).join('')}
           </div>
         </div>
         <button class="del-btn" data-del="${t.id}">✕</button>
