@@ -211,12 +211,15 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
 /* 释放页 */
 #releasePage{
   position:fixed;inset:0;z-index:60;display:none;flex-direction:column;
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   padding:0 18px calc(26px + env(safe-area-inset-bottom,0px));
-  background-color:#f5e7ec;
-  background:linear-gradient(160deg,#f3e0e5 0%,#e8dde8 48%,#f4ecf0 100%);
-  background-size:cover;background-position:center;
+  background:transparent;
   overflow:hidden;
+}
+#relWall{
+  position:fixed;left:0;top:0;width:100vw;height:100vh;height:100lvh;
+  z-index:-2;pointer-events:none;
+  background-color:#f3e0e5;
+  background-size:cover;background-position:center;
 }
 #releasePage::before{
   content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
@@ -239,11 +242,8 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
   box-shadow:var(--shadow-s);
   font-size:15px;line-height:1.6;color:var(--ink);
   cursor:pointer;word-break:break-word;
-  transition:transform .14s,opacity .16s,background .15s;
 }
-.rcard:active{transform:scale(.975);background:rgba(255,255,255,.42);}
-.rcard.picked{transform:scale(1.04);background:rgba(255,255,255,.62);}
-.rcard.away{opacity:0;transform:translateY(-16px) scale(.94);}
+.rcard:active{background:rgba(255,255,255,.52);}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 .rel-bottom{display:flex;justify-content:flex-end;padding-top:10px;}
 .end-btn{
@@ -325,6 +325,7 @@ html::-webkit-scrollbar,html *::-webkit-scrollbar{width:0!important;height:0!imp
 
 <!-- 释放页（全屏） -->
 <div id="releasePage">
+  <div id="relWall"></div>
   <div class="rel-top" id="relTop">
     <div class="rel-goal" id="relGoal"></div>
     <div class="rel-timer"><span id="relTimer">00:00</span><small>用时</small></div>
@@ -684,7 +685,8 @@ function applyWall(){
     var p=PRESETS.find(function(x){ return x.key===state.wall.value; })||PRESETS[0];
     applyTint(p.rgb,1);
     if(rel){rel.style.background='transparent';}
-    [el].forEach(function(node){
+    var relW=document.getElementById('relWall');
+    [el,relW].forEach(function(node){
       if(!node) return;
       node.style.background='none';
       node.style.backgroundImage=p.css;
@@ -696,9 +698,10 @@ function applyWall(){
     idbGet(state.wall.fileId).then(function(blob){
       if(!blob) return;
       var url=URL.createObjectURL(blob);
-      [el].forEach(function(node){
+      var relW=document.getElementById('relWall');
+      [el,relW].forEach(function(node){
         if(!node) return;
-        node.style.background='rgba(250,245,247,.68)';
+        node.style.background='none';
         node.style.backgroundImage='url('+url+')';
         node.style.backgroundSize='cover';
         node.style.backgroundPosition='center';
@@ -1118,16 +1121,7 @@ function pickCard(did, el){
   R.selected.push(d.text);
   saveGoals();
 
-  el.classList.add('picked');
-  var others=document.querySelectorAll('#relCards .rcard');
-  others.forEach(function(o){
-    if(o!==el) o.classList.add('away');
-  });
-  setTimeout(function(){ el.classList.add('away'); },120);
-
-  setTimeout(function(){
-    nextRound();
-  },300);
+  nextRound();
 }
 
 function finishRelease(userEnded){
@@ -1352,13 +1346,25 @@ function bind(){
   });
 
   // 释放页卡片（委托到外层，避免完成视图重建后失效）
-  document.getElementById('releasePage').addEventListener('pointerdown', function(e){
+  // 按下记位置，抬手时若没怎么滑动就算选它（防误触滚动，同时不拖时间）
+  var tapC=null, tapX=0, tapY=0;
+  var relEl=document.getElementById('releasePage');
+  relEl.addEventListener('pointerdown', function(e){
     var c=e.target.closest('.rcard');
-    if(!c||!c.dataset.pick) return;
-    if(c.dataset.tapped) return;
-    c.dataset.tapped='1';
-    pickCard(c.dataset.pick,c);
+    if(!c||!c.dataset.pick){ tapC=null; return; }
+    tapC=c; tapX=e.clientX; tapY=e.clientY;
+    c.style.background='rgba(255,255,255,.52)';
   }, {passive:true});
+  relEl.addEventListener('pointerup', function(e){
+    var c=e.target.closest('.rcard');
+    if(tapC && c===tapC && Math.abs(e.clientX-tapX)<14 && Math.abs(e.clientY-tapY)<14){
+      tapC=null;
+      pickCard(c.dataset.pick,c);
+    }else{
+      tapC=null;
+    }
+  }, {passive:true});
+  relEl.addEventListener('pointercancel', function(){ tapC=null; }, {passive:true});
   document.getElementById('endBtn').addEventListener('click', endReleaseClick);
 
   // 壁纸
