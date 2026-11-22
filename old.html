@@ -242,12 +242,12 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
   box-shadow:var(--shadow-s);
   font-size:15px;line-height:1.6;color:var(--ink);
   cursor:pointer;word-break:break-word;
-  transition:transform .15s,opacity .18s,background .15s;
+  transition:background .1s;
 }
 .rcard{
 }
 .rcard:active{transform:scale(.975);background:rgba(255,255,255,.46);}
-.rcard{animation:cardIn .18s ease both;}
+.rcard{animation:none;}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 .rel-bottom{display:flex;justify-content:flex-end;padding-top:10px;}
 .end-btn{
@@ -1106,7 +1106,7 @@ function renderRound(){
   var cards=R.round.map(function(did,i){
     var d=g.desires.find(function(x){ return x.id===did; });
     if(!d) return '';
-    return '<div class="rcard" data-pick="'+did+'" style="animation-delay:'+(i*35)+'ms">'+esc(d.text)+'</div>';
+    return '<div class="rcard" data-pick="'+did+'">'+esc(d.text)+'</div>';
   }).join('');
   document.getElementById('relCards').innerHTML=cards;
   R.locked=false;
