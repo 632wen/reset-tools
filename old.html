@@ -238,8 +238,8 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
   box-shadow:var(--shadow-s);
   font-size:15px;line-height:1.6;color:var(--ink);
   cursor:pointer;word-break:break-word;
-  transition:transform .18s,opacity .22s,background .2s;
-  animation:cardIn .32s ease both;
+  transition:transform .14s,opacity .16s,background .15s;
+  animation:cardIn .22s ease both;
 }
 .rcard:active{transform:scale(.975);background:rgba(255,255,255,.42);}
 .rcard.picked{transform:scale(1.04);background:rgba(255,255,255,.62);}
@@ -1097,7 +1097,7 @@ function renderRound(){
   var cards=R.round.map(function(did,i){
     var d=g.desires.find(function(x){ return x.id===did; });
     if(!d) return '';
-    return '<div class="rcard" data-pick="'+did+'" style="animation-delay:'+(i*60)+'ms">'+esc(d.text)+'</div>';
+    return '<div class="rcard" data-pick="'+did+'" style="animation-delay:'+(i*35)+'ms">'+esc(d.text)+'</div>';
   }).join('');
   document.getElementById('relCards').innerHTML=cards;
   R.locked=false;
@@ -1122,11 +1122,11 @@ function pickCard(did, el){
   others.forEach(function(o){
     if(o!==el) o.classList.add('away');
   });
-  setTimeout(function(){ el.classList.add('away'); },260);
+  setTimeout(function(){ el.classList.add('away'); },120);
 
   setTimeout(function(){
     nextRound();
-  },520);
+  },300);
 }
 
 function finishRelease(userEnded){
