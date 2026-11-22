@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>情绪释放引导</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='38' fill='%23B8939F'/><circle cx='50' cy='50' r='22' fill='white' opacity='0.75'/></svg>">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --accent:#C9A9B4; --accent-soft:#F2E6EA;
+  --bg-grad-1:#F7F1F3; --bg-grad-2:#EDE2E7;
+  --card:rgba(255,255,255,.82); --card-solid:rgba(255,255,255,.94);
+  --border:rgba(255,255,255,.75);
+  --ink:#5C4A52; --sub:#9A858E;
+  --on-accent:#fff;
+  --shadow:0 8px 24px rgba(150,110,125,.14);
+  --radius:22px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"Noto Sans SC",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--ink);
+  background:linear-gradient(160deg,var(--bg-grad-1),var(--bg-grad-2));
+  background-attachment:fixed;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body.font-serif{font-family:"Noto Serif SC",serif}
+body.font-round{font-family:"Noto Sans SC","PingFang SC",sans-serif;font-weight:400}
+#app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 18px 108px;position:relative}
+body.has-wallpaper{background-size:cover;background-position:center;background-attachment:fixed}
+body.has-wallpaper::before{
+  content:"";position:fixed;inset:0;z-index:-1;
+  background:var(--wall-overlay,linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.6)));
+}
+/* 顶部栏 */
+.topbar{display:flex;align-items:center;gap:12px;padding:18px 2px 10px}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:600;overflow:hidden;flex-shrink:0;box-shadow:var(--shadow)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.top-meta{flex:1;min-width:0}
+.top-title{font-size:17px;font-weight:600}
+.top-sub{font-size:12px;color:var(--sub);margin-top:2px}
+.icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;color:var(--ink);cursor:pointer;font-size:18px;flex-shrink:0}
+.icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn:active{transform:scale(.92)}
+/* 页面切换 */
+.page{display:none;animation:fade .35s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* 卡片 */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);box-shadow:var(--shadow);margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.card-title .muted{font-size:12px;color:var(--sub);font-weight:400}
+/* 首页主卡 */
+.release-card{display:flex;align-items:center;gap:16px}
+.release-info{flex:1;min-width:0}
+.release-label{font-size:11px;letter-spacing:2px;color:var(--accent);font-weight:600;margin-bottom:6px}
+.release-title{font-size:23px;font-weight:700;margin-bottom:6px}
+.release-text{font-size:13px;color:var(--sub);line-height:1.6}
+.release-circle{width:78px;height:78px;border-radius:50%;background:var(--accent);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 22px rgba(150,110,125,.35)}
+.count-num{font-size:26px;font-weight:700;line-height:1}
+.count-label{font-size:11px;opacity:.9;margin-top:3px}
+/* 首页 TODAY 卡 */
+.today-card{display:flex;align-items:center;gap:16px}
+.today-info{flex:1;min-width:0}
+.today-label{font-size:11px;letter-spacing:2px;color:var(--sub);font-weight:600;margin-bottom:10px}
+.today-num{font-size:34px;font-weight:700;line-height:1;display:flex;align-items:baseline;gap:7px}
+.today-num .unit{font-size:14px;font-weight:500;color:var(--ink)}
+.today-sub{font-size:12px;color:var(--sub);margin-top:10px}
+.week-circle{width:86px;height:86px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.35)}
+.week-circle .count-num{color:var(--accent);font-size:26px}
+.week-circle .count-label{color:var(--accent);opacity:.85;margin-top:2px}
+/* 首页快捷入口 */
+.quick-row{display:flex;gap:12px;margin-top:14px}
+.quick-btn{flex:1;min-width:0;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:18px;padding:14px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;color:var(--ink);box-shadow:var(--shadow);text-align:left}
+.quick-btn:active{transform:scale(.97)}
+.quick-ico{width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.quick-ico svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.quick-main{font-size:14px;font-weight:600;display:block}
+.quick-sub{font-size:11px;color:var(--sub);margin-top:2px;display:block}
+.start-target-name{max-width:52vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+/* 添加行 */
+.add-row{display:flex;gap:8px}
+.input{flex:1;min-width:0;border:1px solid var(--border);background:rgba(255,255,255,.5);border-radius:14px;padding:12px 14px;font-size:16px;font-family:inherit;color:var(--ink);outline:none}
+.input::placeholder{color:var(--sub)}
+.input:focus{border-color:var(--accent)}
+.add-btn{width:46px;height:46px;border-radius:14px;border:none;background:var(--accent);color:#fff;font-size:24px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.add-btn:active{transform:scale(.92)}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:18px 8px;line-height:1.7}
+/* 按钮 */
+.primary-btn{width:100%;border:none;border-radius:18px;padding:17px;background:var(--accent);color:var(--on-accent);font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 10px 26px rgba(150,110,125,.3);transition:transform .15s,opacity .15s}
+.primary-btn:active{transform:scale(.97)}
+.primary-btn:disabled{opacity:.45}
+.secondary-btn{width:100%;border:1px solid var(--border);background:var(--card);color:var(--ink);border-radius:16px;padding:14px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px}
+.secondary-btn:active{transform:scale(.98)}
+.text-btn{border:none;background:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:inherit;padding:6px}
+.home-tip{text-align:center;color:var(--sub);font-size:11px;margin-top:14px}
+/* 首页目标卡 */
+.home-target-row{display:flex;align-items:center;gap:12px;cursor:pointer}
+.home-target-main{flex:1;min-width:0}
+.home-target-name{font-size:16px;font-weight:600;margin-bottom:6px;word-break:break-all}
+.home-target-meta{font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.home-target-switch{font-size:12px;color:var(--accent);cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:14px;flex-shrink:0}
+/* 分类标签 */
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.55);color:var(--sub)}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,#999)}
+.tag.money{--c:#C9A98A}.tag.health{--c:#9CBFA8}.tag.relation{--c:#B8A6C9}
+.tag.study{--c:#9FB6D0}.tag.career{--c:#C9B49A}.tag.self{--c:#C9A6B8}.tag.other{--c:#B0A8AC}
+.cat-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.cat-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:7px 13px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.6);cursor:pointer;color:var(--sub)}
+.cat-chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.cat-chip.money{--c:#C9A98A}.cat-chip.health{--c:#9CBFA8}.cat-chip.relation{--c:#B8A6C9}
+.cat-chip.study{--c:#9FB6D0}.cat-chip.career{--c:#C9B49A}.cat-chip.self{--c:#C9A6B8}.cat-chip.other{--c:#B0A8AC}
+.cat-chip.sel{background:var(--c);color:#fff;border-color:var(--c)}
+.cat-chip.sel::before{background:#fff}
+/* 目标列表 */
+.target-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.5);margin-bottom:10px;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s}
+.target-item:active{transform:scale(.99)}
+.target-item.active{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.target-radio{width:19px;height:19px;border-radius:50%;border:2px solid rgba(120,100,110,.28);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.target-item.active .target-radio{border-color:var(--accent)}
+.target-item.active .target-radio::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.target-body{flex:1;min-width:0}
+.target-text{font-size:14px;font-weight:500;word-break:break-all}
+.target-cur{font-size:10px;color:var(--accent);border:1px solid var(--accent);border-radius:10px;padding:1px 7px;margin-left:7px;vertical-align:1px;white-space:nowrap}
+.target-meta{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.target-count{font-size:11px;color:var(--sub)}
+.cat-edit-link{font-size:11px;color:var(--accent);cursor:pointer;text-decoration:underline}
+.cat-edit{display:none;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+.cat-edit.open{display:flex}
+.cat-edit .cat-chip{font-size:11px;padding:5px 10px}
+.del-btn{border:none;background:none;color:#C98A92;font-size:18px;cursor:pointer;padding:4px;flex-shrink:0}
+.filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:rgba(255,255,255,.5);color:var(--sub);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.filter-chip.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* 流程页 */
+.flow-head{display:flex;align-items:center;gap:12px;margin:6px 0 18px}
+.back-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0}
+.flow-head-info{flex:1}
+.flow-step-no{font-size:12px;color:var(--accent);font-weight:600}
+.flow-about{font-size:12px;color:var(--sub);margin-top:2px}
+.step-dots{display:flex;gap:6px;margin:14px 0 8px}
+.step-dot{width:8px;height:8px;border-radius:50%;background:rgba(120,100,110,.18)}
+.step-dot.done{background:var(--accent)}
+.step-dot.cur{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.progress-track{height:4px;border-radius:4px;background:rgba(120,100,110,.12);overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s}
+.step-tag{font-size:11px;letter-spacing:2px;color:var(--accent);font-weight:600;margin-bottom:8px}
+.step-title{font-size:22px;font-weight:700;margin-bottom:10px}
+.step-desc{font-size:13px;color:var(--sub);line-height:1.7;margin-bottom:18px}
+.choice-grid{display:flex;flex-direction:column;gap:10px}
+.choice-btn{border:1px solid var(--border);background:var(--card);border-radius:16px;padding:15px;font-size:15px;cursor:pointer;font-family:inherit;color:var(--ink);text-align:center;backdrop-filter:blur(14px)}
+.choice-btn:active{transform:scale(.97);background:var(--accent-soft)}
+.choice-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* 呼吸圆环 */
+.breath-wrap{display:flex;flex-direction:column;align-items:center;margin:10px 0 22px}
+.breath-circle{width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 50% 40%,var(--accent),color-mix(in srgb,var(--accent) 70%,#000));display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:600;box-shadow:0 14px 40px color-mix(in srgb,var(--accent) 45%,transparent);transition:transform 4s ease-in-out,background .8s;cursor:pointer}
+.breath-circle.inhale{transform:scale(1.12)}
+.breath-circle.hold{transform:scale(1.12)}
+.breath-circle.exhale{transform:scale(.92)}
+.breath-hint{font-size:12px;color:var(--sub);margin-top:16px;text-align:center}
+/* 情绪表 */
+.emo-level{border-radius:14px;background:rgba(255,255,255,.45);margin-bottom:8px;overflow:hidden}
+.emo-level-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.emo-level-bar{width:6px;height:26px;border-radius:4px;flex-shrink:0}
+.emo-level-name{font-size:14px;font-weight:600;flex:1}
+.emo-level-arrow{font-size:12px;color:var(--sub)}
+.emo-words{display:none;flex-wrap:wrap;gap:7px;padding:0 14px 14px}
+.emo-level.open .emo-words{display:flex}
+.emo-word{font-size:12px;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,.6);border:1px solid var(--border);cursor:pointer;color:var(--ink)}
+.emo-word:active{background:var(--accent);color:#fff}
+.emo-custom{display:flex;gap:8px;margin-top:12px}
+.current-emo{display:inline-block;background:var(--accent-soft);color:var(--ink);font-size:14px;padding:8px 16px;border-radius:20px;margin-bottom:14px;border:1px solid var(--border)}
+.current-emo strong{color:var(--accent);font-weight:700}
+/* 第一步情绪快捷胶囊 */
+.quick-emo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.emo-chip{font-size:13px;padding:9px 15px;border-radius:22px;background:rgba(255,255,255,.6);border:1px solid var(--border);cursor:pointer;color:var(--ink);transition:all .15s}
+.emo-chip.sel{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 45%,transparent)}
+.emo-table-link{text-align:center;color:var(--accent);font-size:13px;cursor:pointer;margin:2px 0 12px}
+/* 流程里的目标选择条 */
+.flow-target-pick{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;border-radius:14px;background:var(--card);border:1px solid var(--border);backdrop-filter:blur(14px)}
+.flow-target-pick .ftp-label{font-size:11px;color:var(--sub)}
+.flow-target-pick .ftp-name{flex:1;font-size:14px;font-weight:600}
+.flow-target-pick .ftp-change{font-size:12px;color:var(--accent);cursor:pointer}
+/* 记录页 */
+.stats-row{display:flex;gap:10px;margin-bottom:16px}
+.stat-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 8px;text-align:center;backdrop-filter:blur(18px)}
+.stat-num{font-size:24px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--sub);margin-top:4px}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.month-btn{border:1px solid var(--border);background:rgba(255,255,255,.5);width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:14px}
+.calendar-title{font-size:15px;font-weight:600}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calendar-week{text-align:center;font-size:11px;color:var(--sub);padding:6px 0}
+.calendar-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.day-ball{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink);background:rgba(120,100,110,.08);cursor:pointer;position:relative}
+.day-ball.today{box-shadow:0 0 0 2px var(--ink)}
+.day-ball.sel{box-shadow:0 0 0 2px var(--accent)}
+.legend{display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-top:12px;font-size:10px;color:var(--sub)}
+.legend-dot{width:12px;height:12px;border-radius:50%}
+.today-record{margin-top:14px}
+.record-item{background:rgba(255,255,255,.45);border-radius:12px;padding:12px;margin-bottom:8px;font-size:13px}
+.record-time{font-weight:600;color:var(--accent);margin-right:8px}
+.record-line{font-size:12px;color:var(--sub);margin-top:5px;line-height:1.6}
+/* 日记 */
+.diary-item{border-radius:18px;padding:18px;margin-bottom:14px;cursor:pointer;position:relative}
+.diary-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.diary-head .avatar{width:36px;height:36px;font-size:14px}
+.diary-author{font-size:13px;font-weight:600}
+.diary-time{font-size:11px;color:var(--sub);margin-top:2px}
+.diary-text{font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.diary-emotion{display:inline-block;font-size:11px;padding:2px 9px;border-radius:14px;background:var(--accent-soft);color:var(--accent);margin-top:10px}
+.diary-date-group{font-size:12px;color:var(--sub);margin:18px 4px 10px;font-weight:600}
+/* 日记详情（沉浸式，无白框） */
+#diary-detail{position:fixed;inset:0;z-index:60;max-width:480px;margin:0 auto;overflow-y:auto;padding:56px 26px 40px;display:none;background:linear-gradient(160deg,var(--bg-grad-1),var(--bg-grad-2))}
+body.has-wallpaper #diary-detail{background-size:cover;background-position:center}
+body.has-wallpaper #diary-detail::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--wall-overlay)}
+#diary-detail.show{display:block;animation:fade .3s}
+.detail-close{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(14px);cursor:pointer;font-size:16px}
+.detail-shot{position:absolute;top:18px;left:18px;height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(14px);cursor:pointer;font-size:13px;font-family:inherit}
+body.shot-mode .detail-close,body.shot-mode .detail-shot{display:none}
+.detail-avatar{width:64px;height:64px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:600;overflow:hidden;margin:10px 0 18px}
+.detail-avatar img{width:100%;height:100%;object-fit:cover}
+.detail-author{font-size:18px;font-weight:700}
+.detail-date{font-size:13px;color:var(--sub);margin-top:6px}
+.detail-text{font-size:16px;line-height:2;margin-top:26px;white-space:pre-wrap;word-break:break-word}
+.detail-foot{margin-top:40px;text-align:center;font-size:12px;color:var(--sub);letter-spacing:1px}
+/* 底部导航 */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--card-solid);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid var(--border);padding:8px 0 22px;z-index:40}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:var(--sub);font-size:11px;background:none;border:none;font-family:inherit}
+.nav-item.sel{color:var(--accent);font-weight:600}
+.nav-icon{display:flex;align-items:center;justify-content:center;height:22px}
+.nav-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* 弹层（全屏页面，不透明背景避免透出下层内容） */
+.modal-mask{position:fixed;inset:0;background:var(--page-bg,#FAF4F6);z-index:70;display:none;align-items:flex-start;justify-content:center;overflow-y:auto}
+.modal-mask.show{display:flex}
+.modal{width:100%;max-width:480px;min-height:100vh;padding:20px 20px 120px;animation:fade .3s ease}
+.modal-title{font-size:20px;font-weight:700;margin:6px 0 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;padding:14px 0;background:var(--page-bg,#FAF4F6);z-index:2}
+.close-btn{border:none;background:none;font-size:22px;color:var(--sub);cursor:pointer}
+.setting-section{font-size:12px;color:var(--sub);letter-spacing:1px;margin:20px 0 10px;font-weight:600}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+.setting-row label{font-size:14px}
+.alpha-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.alpha-row input[type=range]{flex:1;height:22px;accent-color:var(--accent)}
+.alpha-row span{font-size:13px;color:var(--ink);min-width:26px;text-align:right}
+.setting-hint{font-size:11.5px;color:var(--sub);margin-top:6px}
+.theme-options{display:flex;gap:10px;flex-wrap:wrap}
+.theme-option{width:46px;height:46px;border-radius:50%;cursor:pointer;border:3px solid transparent;position:relative}
+.theme-option.sel{border-color:var(--ink)}
+.theme-option[data-t=pink]{background:linear-gradient(135deg,#F7F1F3,#C9A9B4)}
+.theme-option[data-t=blue]{background:linear-gradient(135deg,#F2F6FA,#A3B4C9)}
+.theme-option[data-t=beige]{background:linear-gradient(135deg,#F7F1E6,#C9B299)}
+.theme-option[data-t=green]{background:linear-gradient(135deg,#F0F6F2,#9CBFA8)}
+.theme-option[data-t=wallpaper]{background:conic-gradient(#C9A9B4,#A3B4C9,#C9B299,#9CBFA8)}
+.upload-area{border:1.5px dashed var(--border);border-radius:16px;padding:20px;text-align:center;color:var(--sub);font-size:13px;cursor:pointer;margin-bottom:10px}
+.avatar-upload{display:flex;align-items:center;gap:16px}
+.avatar-upload .avatar{width:64px;height:64px;font-size:24px}
+.avatar-actions{display:flex;flex-direction:column;gap:8px}
+.mini-btn{border:1px solid var(--border);background:rgba(255,255,255,.6);border-radius:12px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.danger-btn{width:100%;border:1px solid rgba(201,138,146,.4);color:#C98A92;background:rgba(255,255,255,.4);border-radius:14px;padding:13px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px}
+/* toast */
+#toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(70,55,62,.92);color:#fff;padding:12px 22px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:99;max-width:88%;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* 莫兰迪确认弹窗 */
+.cf-mask{position:fixed;inset:0;background:rgba(60,45,52,.32);backdrop-filter:blur(6px);z-index:120;display:none;align-items:center;justify-content:center;padding:24px}
+.cf-mask.show{display:flex}
+.cf-box{background:var(--card-solid);border:1px solid var(--border);border-radius:24px;padding:24px;width:100%;max-width:320px;box-shadow:var(--shadow);animation:fade .25s ease}
+.cf-title{font-size:17px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.cf-msg{font-size:14px;color:var(--sub);line-height:1.6;margin-bottom:20px}
+.cf-btns{display:flex;gap:10px}
+.cf-btn{flex:1;padding:12px;border-radius:14px;border:none;font-size:14px;font-weight:600;cursor:pointer}
+.cf-cancel{background:var(--accent-soft);color:var(--ink)}
+.cf-ok{background:var(--accent);color:var(--on-accent)}
+.hidden{display:none!important}
+/* 磨砂浓度：低透明度时减少模糊，让壁纸更清楚 */
+.card,.quick-btn,.icon-btn,.back-btn,.secondary-btn,.stat-card,.choice-btn,.flow-target-pick,.detail-close,.detail-shot,.bottom-nav,.cf-box{
+  backdrop-filter:blur(var(--card-blur,18px)) saturate(120%);
+  -webkit-backdrop-filter:blur(var(--card-blur,18px)) saturate(120%);
+}
+</style>
+<style>
+#netlify-badge,.netlify-badge,a[href*="netlify.com"][href*="utm_campaign"],iframe#nl-badge-frame,[id^="nl-badge"]{display:none!important;visibility:hidden!important;opacity:0!important;width:0!important;height:0!important}
+</style>
+<script>
+(function(){
+  function kill(){
+    var nodes=document.querySelectorAll('#nl-badge-frame,iframe[id*="nl-badge"],div[id*="nl-badge"]');
+    for(var i=0;i<nodes.length;i++){
+      try{nodes[i].parentNode.removeChild(nodes[i]);}catch(e){}
+    }
+  }
+  [0,300,900,1800,3500,6000].forEach(function(t){setTimeout(kill,t);});
+  setInterval(kill,1000);
+  try{new MutationObserver(kill).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
+<style>
+html{color-scheme:light}
+html::-webkit-scrollbar{width:7px;height:7px}
+html::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-thumb{background:rgba(20,40,55,.22);border-radius:8px}
+html[data-tone="dark"]::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="avatar" id="topAvatar"></div>
+    <div class="top-meta">
+      <div class="top-title" id="topTitle"></div>
+      <div class="top-sub" id="topSub"></div>
+    </div>
+    <button class="icon-btn" id="settingsBtn" title="设置">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7 1.1V21a2 2 0 11-4 0v-.1A1.6 1.6 0 007 19.4l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.6 1.6 0 004.6 14H4.5a2 2 0 110-4h.1A1.6 1.6 0 005.9 7l-.1-.1a2 2 0 112.8-2.8l.1.1A1.6 1.6 0 0010 4.6V4.5a2 2 0 114 0v.1a1.6 1.6 0 002.7 1.1l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8 1.6 1.6 0 001.5 1h.1a2 2 0 110 4h-.1a1.6 1.6 0 00-1.3 1z"/></svg>
+    </button>
+  </div>
+
+  <div id="page-home" class="page active"></div>
+  <div id="page-target" class="page"></div>
+  <div id="page-flow" class="page"></div>
+  <div id="page-record" class="page"></div>
+  <div id="page-diary" class="page"></div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item" data-page="home"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></span>首页</button>
+    <button class="nav-item" data-page="target"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span>目标</button>
+    <button class="nav-item" data-page="record"><span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13h3M8 16.5h6"/></svg></span>记录</button>
+    <button class="nav-item" data-page="diary"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v15H6.5A1.5 1.5 0 005 19.5z"/><path d="M5 19.5A1.5 1.5 0 016.5 18H19v3H6.5A1.5 1.5 0 015 19.5z"/><path d="M14 7h-6M14 11h-6"/></svg></span>日记</button>
+  </nav>
+</div>
+
+<!-- 日记沉浸式详情 -->
+<div id="diary-detail">
+  <button class="detail-shot" id="shotBtn">截图模式</button>
+  <button class="detail-close" id="detailClose">✕</button>
+  <div id="detailContent"></div>
+</div>
+
+<!-- 设置弹层 -->
+<div class="modal-mask" id="settingsMask">
+  <div class="modal" id="settingsModal"></div>
+</div>
+
+<!-- 情绪表弹层 -->
+<div class="modal-mask" id="emoMask">
+  <div class="modal" id="emoModal"></div>
+</div>
+
+<!-- 写日记弹层 -->
+<div class="modal-mask" id="diaryMask">
+  <div class="modal" id="diaryModal"></div>
+</div>
+
+<input type="file" id="wallpaperInput" accept="image/*" class="hidden">
+<input type="file" id="avatarInput" accept="image/*" class="hidden">
+<input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2" class="hidden">
+<input type="file" id="importInput" accept=".json" class="hidden">
+
+<!-- 莫兰迪确认弹窗 -->
+<div class="cf-mask" id="cfMask">
+  <div class="cf-box">
+    <div class="cf-title" id="cfTitle">确定吗？</div>
+    <div class="cf-msg" id="cfMsg"></div>
+    <div class="cf-btns">
+      <button class="cf-btn cf-cancel" id="cfCancel">取消</button>
+      <button class="cf-btn cf-ok" id="cfOk">删除</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ========== 数据与状态 ========== */
+const STORE_KEY='emotion_release_v2';
+const CATS=[
+  {k:'money',n:'金钱'},{k:'health',n:'健康'},{k:'relation',n:'关系'},
+  {k:'study',n:'学业'},{k:'career',n:'事业'},{k:'self',n:'自我'},{k:'other',n:'其他'}
+];
+const catName=k=>(CATS.find(c=>c.k===k)||CATS[6]).n;
+const catColor={money:'#C9A98A',health:'#9CBFA8',relation:'#B8A6C9',study:'#9FB6D0',career:'#C9B49A',self:'#C9A6B8',other:'#B0A8AC'};
+/* 圣多纳九大情绪层级 AGFLAP→CAP（高层用绿，低层用暖色） */
+const EMO_LEVELS=[
+  {k:'apathy',n:'冷漠',bar:'#9C8FB0',words:['绝望','沮丧','无力','麻木','抑郁','放弃','无助','疏离','疲惫','空虚','无所谓','自暴自弃']},
+  {k:'grief',n:'悲伤',bar:'#7FA0C9',words:['悲伤','失落','遗憾','心碎','孤独','被抛弃','想念','痛苦','想哭','委屈','惋惜']},
+  {k:'fear',n:'恐惧',bar:'#6FB0A8',words:['恐惧','焦虑','恐慌','紧张','担心','害怕','不安','忧虑','惶恐','回避','压力','害怕被发现']},
+  {k:'lust',n:'贪求',bar:'#C9A96F',words:['渴望','贪婪','欲望','匮乏','占有','嫉妒','羡慕','上瘾','饥渴','索取','不满足']},
+  {k:'anger',n:'愤怒',bar:'#D0867A',words:['愤怒','怨恨','烦躁','憎恨','敌意','暴怒','不耐烦','指责','刻薄','想报复','生气']},
+  {k:'pride',n:'骄傲',bar:'#C9A07A',words:['骄傲','傲慢','虚荣','优越感','固执','评判','偏见','自满','控制欲','防御','不服']},
+  {k:'courage',n:'勇气',bar:'#7FC98F',words:['勇气','积极','主动','热情','开放','坚定','探索','活力','确信','愿意行动']},
+  {k:'acceptance',n:'接纳',bar:'#7FC9B0',words:['接纳','平和','包容','放松','满足','感恩','温和','从容','和谐','信任']},
+  {k:'peace',n:'平静',bar:'#8FD0C6',words:['平静','自由','喜悦','宁静','无条件的爱','觉察','圆满','清明','临在','解脱']}
+];
+const WANTS=[{k:'approval',n:'想要被认同'},{k:'control',n:'想要控制'},{k:'security',n:'想要安全'}];
+/* 第一步常用情绪快捷词 */
+const QUICK_EMOS=['焦虑','紧张','烦躁','愤怒','委屈','难过','悲伤','害怕','孤独','无力','疲惫','压抑','嫉妒','压力','空虚','愧疚','后悔','失望'];
+
+let state=load();
+function load(){
+  let s=null;try{s=JSON.parse(localStorage.getItem(STORE_KEY));}catch(e){}
+  const m=migrate(s&&typeof s==='object'?s:{});
+  localStorage.setItem(STORE_KEY,JSON.stringify(m));
+  return m;
+}
+function migrate(s){
+  const base={profile:{name:'旅人',avatar:''},theme:'pink',wallpaper:'',font:'sans',cardAlpha:80,
+    targets:[],records:[],diaries:[],activeTargetId:null,filterCat:'all',calMonth:null,pendingEmotion:'',pendingLevel:'',customEmos:[]};
+  const m=Object.assign(base,s);
+  (m.records||[]).forEach(r=>{if(!r.time)r.time='早前';});
+  /* 清掉已删除目标留下的孤儿记录 */
+  const ids=new Set((m.targets||[]).map(t=>t.id));
+  m.records=(m.records||[]).filter(r=>!r.targetId||ids.has(r.targetId));
+  if(!Array.isArray(m.customEmos))m.customEmos=[];
+  return m;
+}
+function save(){localStorage.setItem(STORE_KEY,JSON.stringify(state));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+/* 莫兰迪确认弹窗 */
+function cfDialog(title,msg,okText){
+  return new Promise(resolve=>{
+    document.getElementById('cfTitle').textContent=title;
+    document.getElementById('cfMsg').textContent=msg;
+    document.getElementById('cfOk').textContent=okText||'确定';
+    document.getElementById('cfMask').classList.add('show');
+    const close=val=>{document.getElementById('cfMask').classList.remove('show');resolve(val);};
+    document.getElementById('cfCancel').onclick=()=>close(false);
+    document.getElementById('cfOk').onclick=()=>close(true);
+  });
+}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function todayKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function nowTime(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function greeting(){const h=new Date().getHours();if(h<5)return '夜深了';if(h<11)return '早上好';if(h<14)return '中午好';if(h<18)return '下午好';if(h<22)return '晚上好';return '夜深了';}
+function dateCN(){const d=new Date();const w=['周日','周一','周二','周三','周四','周五','周六'];return (d.getMonth()+1)+'月'+d.getDate()+'日 · '+w[d.getDay()];}
+
+/* ========== 主题与壁纸取色 ========== */
+const THEMES={
+  pink:{accent:'#C9A9B4',soft:'#F2E6EA',g1:'#F7F1F3',g2:'#EDE2E7',ink:'#5C4A52',sub:'#9A858E',dark:false},
+  blue:{accent:'#A3B4C9',soft:'#E8EEF4',g1:'#F2F6FA',g2:'#E2EAF2',ink:'#45505F',sub:'#8593A3',dark:false},
+  beige:{accent:'#C9B299',soft:'#F2E9DC',g1:'#F7F1E6',g2:'#ECE0CC',ink:'#5C4E3C',sub:'#988874',dark:false},
+  green:{accent:'#9CBFA8',soft:'#E6F0EA',g1:'#F0F6F2',g2:'#E0EBE4',ink:'#4A5C50',sub:'#85938A',dark:false}
+};
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0;const l=(mx+mn)/2;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;}h/=6;}return[h*360,s,l];}
+function hslStr(h,s,l){return`hsl(${Math.round(h)},${Math.round(s*100)}%,${Math.round(l*100)}%)`;}
+function mix(hex,target,amt){
+  const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  const t=target==='w'?[255,255,255]:[0,0,0];
+  r=Math.round(r+(t[0]-r)*amt);g=Math.round(g+(t[1]-g)*amt);b=Math.round(b+(t[2]-b)*amt);
+  return `rgb(${r},${g},${b})`;
+}
+function cardK(){
+  const v=typeof state.cardAlpha==='number'?state.cardAlpha:80;
+  return Math.min(1,Math.max(0,v/100));
+}
+function setVars(c){
+  const r=document.documentElement.style;
+  const k=cardK();
+  r.setProperty('--accent',c.accent);r.setProperty('--accent-soft',c.soft);
+  r.setProperty('--bg-grad-1',c.g1);r.setProperty('--bg-grad-2',c.g2);
+  r.setProperty('--ink',c.ink);r.setProperty('--sub',c.sub);
+  r.setProperty('--on-accent',c.dark?'#2A2B36':'#fff');
+  if(c.dark){
+    const f=k<=.12?0:Math.pow((k-.12)/.88,1.6);
+    r.setProperty('--card','rgba(50,51,66,'+ (0.80*f).toFixed(3) +')');
+    r.setProperty('--card-blur',(16*f).toFixed(2)+'px');
+    r.setProperty('--card-solid','rgba(42,43,56,'+ (0.12+0.78*f).toFixed(3) +')');
+    r.setProperty('--border','rgba(255,255,255,.14)');
+    r.setProperty('--shadow','0 8px 24px rgba(0,0,0,.28)');
+    r.setProperty('--page-bg','#2A2B38');
+  }else{
+    const f=k<=.12?0:Math.pow((k-.12)/.88,1.6);
+    r.setProperty('--card','rgba(255,255,255,'+ (0.86*f).toFixed(3) +')');
+    r.setProperty('--card-blur',(16*f).toFixed(2)+'px');
+    r.setProperty('--card-solid','rgba(255,255,255,'+ (0.10+0.80*f).toFixed(3) +')');
+    r.setProperty('--border','rgba(255,255,255,.75)');r.setProperty('--shadow','0 8px 24px rgba(150,110,125,.14)');
+    r.setProperty('--page-bg','#FAF4F6');
+  }
+  document.body.classList.toggle('font-serif',state.font==='serif');
+  document.body.classList.toggle('font-round',state.font==='round');
+}
+function applyPreset(theme){
+  const t=THEMES[theme]||THEMES.pink;
+  document.body.classList.remove('has-wallpaper');
+  document.body.style.backgroundImage='';
+  document.getElementById('diary-detail').style.backgroundImage='';
+  setVars({accent:t.accent,soft:t.soft,g1:t.g1,g2:t.g2,ink:t.ink,sub:t.sub,dark:t.dark});
+}
+/* 从壁纸提取主题。代次保护：快速换图时旧结果不覆盖新结果 */
+let themeReqId=0;
+function applyWallpaper(dataUrl){
+  document.body.classList.add('has-wallpaper');
+  const bg=`url("${dataUrl}")`;
+  document.body.style.backgroundImage=bg;
+  document.getElementById('diary-detail').style.backgroundImage=bg;
+  const myReq=++themeReqId;
+  const img=new Image();
+  img.onload=function(){
+    if(myReq!==themeReqId)return;
+    const size=96;const canvas=document.createElement('canvas');canvas.width=size;canvas.height=size;
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,size,size);
+    let data;
+    try{data=ctx.getImageData(0,0,size,size).data;}catch(e){applyPreset('pink');return;}
+    let rs=0,gs=0,bs=0,n=0,colorN=0,sumS=0,sumL=0;
+    const hueBuckets={};
+    for(let i=0;i<data.length;i+=4){
+      const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+      if(a<120)continue;
+      rs+=r;gs+=g;bs+=b;n++;
+      const[h,s,l]=rgbToHsl(r,g,b);
+      sumL+=l;
+      if(s>0.18&&l>0.12&&l<0.92){colorN++;sumS+=s;
+        const hb=Math.round(h/24)*24;hueBuckets[hb]=(hueBuckets[hb]||0)+1;}
+    }
+    if(!n){applyPreset('pink');return;}
+    const ar=rs/n,ag=gs/n,ab=bs/n;
+    const colorRatio=colorN/n,avgS=colorN?sumS/colorN:0,avgL=sumL/n;
+    let accent,soft,ink,sub,dark=false;
+    /* 低彩度（黑白/线稿/灰调）：给莫兰迪灰玫瑰，不再冷蓝 */
+    if(colorRatio<0.12||avgS<0.12){
+      if(avgL<0.32){ /* 深色壁纸 */
+        dark=true;accent=hslStr(350,0.15,0.66);soft='rgba(255,255,255,.1)';ink='#ECEAF2';sub='#B6A8AE';
+      }else{ /* 浅色线稿/灰调 */
+        accent=hslStr(350,0.15,0.62);soft='rgba(201,169,180,.14)';ink='#5C4A52';sub='#9A858E';
+      }
+    }else{
+      /* 彩色：取主色相，再莫兰迪化（降饱和、提明度，柔和不深不艳） */
+      let bestH=0,bestV=0;
+      for(const h in hueBuckets){if(hueBuckets[h]>bestV){bestV=hueBuckets[h];bestH=+h;}}
+      if(avgL<0.32){dark=true;}
+      accent=hslStr(bestH,0.22, dark?0.66:0.6);
+      if(dark){soft='rgba(255,255,255,.1)';ink='#ECEAF2';sub='#B6A8AE';}
+      else{soft=hslStr(bestH,0.3,0.92);ink='#5C4A52';sub='#9A858E';}
+    }
+    const kk=cardK();
+    const kk2=kk<=.12?0:Math.pow((kk-.12)/.88,1.6);
+    const g1=dark?'rgba(30,31,42,'+(0.72*kk2).toFixed(3)+')':'rgba(255,255,255,'+(0.62*kk2).toFixed(3)+')';
+    const g2=dark?'rgba(28,29,38,'+(0.74*kk2).toFixed(3)+')':'rgba(255,255,255,'+(0.52*kk2).toFixed(3)+')';
+    document.documentElement.style.setProperty('--wall-overlay',`linear-gradient(160deg,${g1},${g2})`);
+    setVars({accent,soft,g1:'transparent',g2:'transparent',ink,sub,dark});
+  };
+  img.onerror=function(){applyPreset('pink');};
+  img.src=dataUrl;
+}
+function applyTheme(){
+  /* 只要设过壁纸就优先铺壁纸，选色点也不会把壁纸藏掉，只换主色 */
+  if(state.wallpaper){applyWallpaper(state.wallpaper);}
+  else applyPreset(state.theme);
+}
+
+/* ========== 顶部栏与导航 ========== */
+function renderTop(){
+  const av=document.getElementById('topAvatar');
+  av.innerHTML=state.profile.avatar?`<img src="${state.profile.avatar}">`:esc((state.profile.name||'旅')[0]);
+  document.getElementById('topTitle').textContent=state.profile.name||'旅人';
+  document.getElementById('topSub').textContent=dateCN();
+}
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('sel',b.dataset.page===p));
+  window.scrollTo(0,0);
+  if(p==='home')renderHome();
+  if(p==='target')renderTarget();
+  if(p==='record')renderRecord();
+  if(p==='diary')renderDiary();
+}
+document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+
+/* ========== 首页 ========== */
+function todayCount(){const k=todayKey();return state.records.filter(r=>r.date===k).length;}
+function targetCount(id){return state.records.filter(r=>r.targetId===id).length;}
+function weekCount(){
+  const now=new Date();
+  const wd=now.getDay();
+  const offset=wd===0?6:wd-1; /* 周一为一周起点 */
+  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-offset);
+  const startK=todayKey(start);
+  return state.records.filter(r=>r.date>=startK).length;
+}
+function currentTarget(){
+  let t=state.targets.find(x=>x.id===state.activeTargetId);
+  if(!t&&state.targets.length){t=state.targets[0];state.activeTargetId=t.id;save();}
+  return t||null;
+}
+function renderHome(){
+  const tc=todayCount();
+  const active=currentTarget();
+  const el=document.getElementById('page-home');
+  el.innerHTML=`
+    <div class="card today-card">
+      <div class="today-info">
+        <div class="today-label">TODAY</div>
+        <div class="today-num">${tc}<span class="unit">次释放</span></div>
+        <div class="today-sub">累计 ${state.records.length} · 坚持 ${streakDays()} 天</div>
+      </div>
+      <div class="week-circle"><div class="count-num">${weekCount()}</div><div class="count-label">本周</div></div>
+    </div>
+    <div class="card" id="homeTargetCard">
+      <div class="card-title">我的目标 <span class="muted">针对它释放</span></div>
+      ${active?`
+        <div class="home-target-row">
+          <div class="home-target-main">
+            <div class="home-target-name">${esc(active.text)}</div>
+            <div class="home-target-meta"><span class="tag ${active.cat}">${catName(active.cat)}</span><span>已释放 ${targetCount(active.id)} 次</span></div>
+          </div>
+          ${state.targets.length>1?'<span class="home-target-switch" id="homeTargetSwitch">切换</span>':''}
+        </div>`
+      :`<div class="empty">还没有目标，去「目标」页新建一个，再针对它释放。</div>`}
+    </div>
+    <button class="primary-btn" id="startBtn" style="margin-top:4px">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;vertical-align:-2px;fill:currentColor;stroke:none;margin-right:4px"><path d="M7 5l12 7-12 7z"/></svg>开始释放${active?` · <span class="start-target-name">${esc(active.text)}</span>`:''}
+    </button>
+    <div class="quick-row">
+      <button class="quick-btn" id="homeEmoBtn">
+        <span class="quick-ico"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16l4-6.5 3 4 2.5-3.5L20 15"/></svg></span>
+        <span style="min-width:0"><span class="quick-main">九大情绪表</span><span class="quick-sub">AGFLAP → CAP</span></span>
+      </button>
+      <button class="quick-btn" id="homeDiaryBtn">
+        <span class="quick-ico"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></span>
+        <span style="min-width:0"><span class="quick-main">写日记</span><span class="quick-sub">记下此刻</span></span>
+      </button>
+    </div>
+    <div class="home-tip">固定七步引导 · 数据只保存在本机浏览器</div>`;
+  document.getElementById('homeTargetCard').onclick=()=>{
+    if(!state.targets.length){toast('先去「目标」页添加一个目标');showPage('target');return;}
+    startFlow();
+  };
+  const sw=document.getElementById('homeTargetSwitch');
+  if(sw)sw.onclick=(e)=>{e.stopPropagation();const i=state.targets.findIndex(x=>x.id===state.activeTargetId);state.activeTargetId=state.targets[(i+1)%state.targets.length].id;save();renderHome();};
+  document.getElementById('startBtn').onclick=()=>{
+    if(!state.targets.length){toast('先去「目标」页添加一个目标');showPage('target');return;}
+    startFlow();
+  };
+  document.getElementById('homeEmoBtn').onclick=()=>openEmoSheet('home');
+  document.getElementById('homeDiaryBtn').onclick=()=>openDiaryEditor({});
+}
+
+/* ========== 目标页 ========== */
+function renderTarget(){
+  const el=document.getElementById('page-target');
+  const cats=['all',...CATS.map(c=>c.k)];
+  const filter=state.filterCat||'all';
+  const shown=state.targets.filter(t=>filter==='all'||t.cat===filter);
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-title">新建目标 <span class="muted">选一个分类</span></div>
+      <div class="cat-picker" id="newCatPicker">
+        ${CATS.map(c=>`<span class="cat-chip ${c.k} ${c.k==='money'?'sel':''}" data-cat="${c.k}">${c.n}</span>`).join('')}
+      </div>
+      <div class="add-row" style="margin-top:12px">
+        <input class="input" id="targetInput" placeholder="写下你正在面对的目标…" maxlength="40">
+        <button class="add-btn" id="targetAddBtn">＋</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">我的目标 <span class="muted">共 ${state.targets.length} 个 · 点目标可切换当前</span></div>
+      <div class="filter-row">
+        ${cats.map(c=>`<span class="filter-chip ${filter===c?'sel':''}" data-f="${c}">${c==='all'?'全部':catName(c)}</span>`).join('')}
+      </div>
+      <div id="targetList" style="margin-top:12px"></div>
+    </div>`;
+  // 新建分类选择（默认金钱）
+  let newCat='money';
+  document.getElementById('newCatPicker').querySelectorAll('.cat-chip').forEach(ch=>{
+    ch.onclick=()=>{newCat=ch.dataset.cat;
+      document.getElementById('newCatPicker').querySelectorAll('.cat-chip').forEach(x=>x.classList.toggle('sel',x.dataset.cat===newCat));};
+  });
+  const add=()=>{const inp=document.getElementById('targetInput');const v=inp.value.trim();
+    if(!v){toast('先写下目标');return;}
+    const t={id:uid(),text:v,cat:newCat,createdAt:Date.now()};
+    state.targets.push(t);state.activeTargetId=t.id;save();inp.value='';renderTarget();toast('已添加，并设为当前目标');};
+  document.getElementById('targetAddBtn').onclick=add;
+  document.getElementById('targetInput').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
+  document.querySelectorAll('.filter-chip').forEach(f=>f.onclick=()=>{state.filterCat=f.dataset.f;save();renderTarget();});
+  const list=document.getElementById('targetList');
+  if(!shown.length){list.innerHTML=`<div class="empty">${state.targets.length?'这个分类下还没有目标':'还没有目标，先在上方新建一个'}</div>`;}
+  else{
+    list.innerHTML=shown.map(t=>`
+      <div class="target-item ${t.id===state.activeTargetId?'active':''}" data-id="${t.id}">
+        <span class="target-radio"></span>
+        <div class="target-body">
+          <div class="target-text">${esc(t.text)}${t.id===state.activeTargetId?'<span class="target-cur">当前</span>':''}</div>
+          <div class="target-meta">
+            <span class="tag ${t.cat}">${catName(t.cat)}</span>
+            <span class="cat-edit-link" data-edit="${t.id}">改分类</span>
+            <span class="target-count">已释放 ${targetCount(t.id)}</span>
+          </div>
+          <div class="cat-edit" id="catEdit-${t.id}">
+            ${CATS.map(c=>`<span class="cat-chip ${c.k}" data-cat="${c.k}">${c.n}</span>`).join('')}
+          </div>
+        </div>
+        <button class="del-btn" data-del="${t.id}">✕</button>
+      </div>`).join('');
+    /* 点整行：切换为当前目标 */
+    list.querySelectorAll('.target-item').forEach(row=>row.onclick=e=>{
+      if(e.target.closest('[data-del]')||e.target.closest('[data-edit]')||e.target.closest('.cat-edit'))return;
+      state.activeTargetId=row.dataset.id;save();renderTarget();
+      toast('已切换当前目标，开始释放将计入它');
+    });
+    list.querySelectorAll('[data-del]').forEach(b=>b.onclick=async e=>{
+      e.stopPropagation();
+      const id=b.dataset.del;
+      const ok=await cfDialog('删除这个目标？','它的历史释放记录会一起删掉。','删除');
+      if(!ok)return;
+      state.targets=state.targets.filter(x=>x.id!==id);
+      state.records=state.records.filter(r=>r.targetId!==id);
+      if(state.activeTargetId===id)state.activeTargetId=state.targets[0]?state.targets[0].id:null;
+      save();renderTarget();toast('目标已删除');
+    });
+    list.querySelectorAll('[data-edit]').forEach(l=>l.onclick=e=>{
+      e.stopPropagation();
+      const id=l.dataset.edit;document.getElementById('catEdit-'+id).classList.toggle('open');});
+    list.querySelectorAll('.cat-edit').forEach(box=>{
+      const id=box.id.replace('catEdit-','');
+      box.querySelectorAll('.cat-chip').forEach(ch=>ch.onclick=e=>{
+        e.stopPropagation();
+        const t=state.targets.find(x=>x.id===id);if(!t)return;
+        t.cat=ch.dataset.cat;
+        state.records.forEach(r=>{if(r.targetId===id)r.cat=ch.dataset.cat;});
+        save();renderTarget();toast('分类已改');
+      });
+    });
+  }
+}
+
+/* ========== 七步释放流程 ========== */
+let flow=null;
+let breathTimer=null;
+function startFlow(){
+  currentTarget();
+  flow={step:1,emotion:state.pendingEmotion||'',level:state.pendingLevel||'',want:'',targetId:state.activeTargetId};
+  state.pendingEmotion='';state.pendingLevel='';save();
+  showPage('flow');renderFlow();
+}
+function targetText(id){const t=state.targets.find(x=>x.id===id);return t?t.text:'';}
+function flowShell(body){
+  const t=state.targets.find(x=>x.id===flow.targetId);
+  const dots=Array.from({length:7},(_,i)=>`<span class="step-dot ${i+1<flow.step?'done':''} ${i+1===flow.step?'cur':''}"></span>`).join('');
+  document.getElementById('page-flow').innerHTML=`
+    <div class="flow-head">
+      <button class="back-btn" id="flowBack">‹</button>
+      <div class="flow-head-info">
+        <div class="flow-step-no">第 ${flow.step} 步 / 共 7 步</div>
+        <div class="flow-about">关于：${esc(t?t.text:'')}</div>
+      </div>
+    </div>
+    <div class="step-dots">${dots}</div>
+    <div class="progress-track"><div class="progress-fill" style="width:${(flow.step/7)*100}%"></div></div>
+    <div class="card" style="margin-top:16px">${body}</div>`;
+  document.getElementById('flowBack').onclick=()=>{
+    if(flow.step>1){stopBreath();flow.step--;renderFlow();}
+    else{stopBreath();showPage('home');}
+  };
+  return document.getElementById('page-flow');
+}
+function renderFlow(){
+  stopBreath();
+  const s=flow.step;
+  const t=state.targets.find(x=>x.id===flow.targetId);
+  /* 针对谁释放：多个目标时给切换条 */
+  const targetPick = state.targets.length>1
+    ? `<div class="flow-target-pick"><span class="ftp-label">针对</span><span class="ftp-name">${esc(t?t.text:'')}</span><span class="ftp-change" id="ftpChange">切换目标</span></div>`
+    : '';
+  if(s===1){
+    flowShell(`
+      ${targetPick}
+      <div class="step-tag">STEP 1 · 辨认</div>
+      <div class="step-title">此刻是什么情绪？</div>
+      <div class="step-desc">点一下你现在的情绪，也可以打开完整情绪表挑选。</div>
+      ${flow.emotion?`<div class="current-emo">当前情绪：<strong>${esc(flow.emotion)}</strong>${flow.level?` · ${esc(flow.level)}层`:''}</div>`:''}
+      <div class="quick-emo-grid" id="quickEmoGrid">
+        ${[...QUICK_EMOS,...(state.customEmos||[])].filter((w,i,a)=>a.indexOf(w)===i).map(w=>`<span class="emo-chip ${flow.emotion===w?'sel':''}" data-q="${w}">${w}</span>`).join('')}
+      </div>
+      <div class="emo-table-link" id="openEmo">查看完整九大情绪表 ▾</div>
+      <button class="primary-btn" id="emoNext" style="margin-top:14px">下一步</button>`);
+    const syncGrid=()=>{document.querySelectorAll('#quickEmoGrid .emo-chip').forEach(x=>x.classList.toggle('sel',x.dataset.q===flow.emotion));};
+    document.querySelectorAll('#quickEmoGrid .emo-chip').forEach(ch=>ch.onclick=()=>{
+      flow.emotion=ch.dataset.q;syncGrid();
+    });
+    document.getElementById('openEmo').onclick=()=>openEmoSheet('flow');
+    const next=()=>{
+      if(!flow.emotion){toast('点一个此刻的情绪');return;}
+      flow.step=2;renderFlow();
+    };
+    document.getElementById('emoNext').onclick=next;
+  }
+  else if(s===2){
+    flowShell(`
+      <div class="step-tag">STEP 2 · 觉察</div>
+      <div class="step-title">允许它浮现</div>
+      <div class="step-desc">闭上眼，让「${esc(flow.emotion)}」自然地在身体里待一会儿。它在身体的哪个位置？胸口、喉咙、还是胃？只是看着它，不推开它。</div>
+      <div class="breath-wrap"><div class="breath-circle" id="bc">感受…</div><div class="breath-hint">跟着光圈缓慢呼吸</div></div>
+      <button class="primary-btn" id="to3">我感受到它了</button>`);
+    startBreath(['感受…','吸气…','松开…']);
+    document.getElementById('to3').onclick=()=>{flow.step=3;renderFlow();};
+  }
+  else if(s===3){
+    flowShell(`
+      <div class="step-tag">STEP 3 · 它在想要什么</div>
+      <div class="step-title">这背后，它在要什么？</div>
+      <div class="step-desc">圣多纳释放法里，情绪背后都藏着三种「想要」之一。这股「${esc(flow.emotion)}」更像是在要哪一个？说不清可以跳过。</div>
+      <div class="choice-grid">
+        ${WANTS.map(w=>`<button class="choice-btn" data-w="${w.k}">${w.n}</button>`).join('')}
+        <button class="choice-btn" data-w="skip">说不清，跳过</button>
+      </div>`);
+    document.getElementById('page-flow').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{flow.want=b.dataset.w==='skip'?'':b.dataset.w;flow.step=4;renderFlow();});
+  }
+  else if(s===4){
+    flowShell(`
+      <div class="step-tag">STEP 4 · 叩问</div>
+      <div class="step-title">我能不能放下它？</div>
+      <div class="step-desc">不是「该不该」，只是诚实地问：此刻，我<strong>能不能</strong>允许这股「${esc(flow.emotion)}」离开？无论答案是什么，都可以继续。</div>
+      <div class="choice-grid">
+        <button class="choice-btn primary" data-a="能">能</button>
+        <button class="choice-btn" data-a="还不能">还不能</button>
+        <button class="choice-btn" data-a="不确定">不确定</button>
+      </div>`);
+    document.getElementById('page-flow').querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{flow.ans1=b.dataset.a;flow.step=5;renderFlow();});
+  }
+  else if(s===5){
+    flowShell(`
+      <div class="step-tag">STEP 5 · 叩问</div>
+      <div class="step-title">我愿不愿意放下它？</div>
+      <div class="step-desc">再问一次：我<strong>愿不愿意</strong>让它走？愿意不是勉强，是给自由留一个口子。</div>
+      <div class="choice-grid">
+        <button class="choice-btn primary" data-a="愿意">愿意</button>
+        <button class="choice-btn" data-a="还不愿意">还不愿意</button>
+        <button class="choice-btn" data-a="不确定">不确定</button>
+      </div>`);
+    document.getElementById('page-flow').querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{flow.ans2=b.dataset.a;flow.step=6;renderFlow();});
+  }
+  else if(s===6){
+    flowShell(`
+      <div class="step-tag">STEP 6 · 释放</div>
+      <div class="step-title">什么时候放下？</div>
+      <div class="breath-wrap">
+        <div class="breath-circle" id="bc">松开…</div>
+        <div class="breath-hint">你正在让它流走</div>
+      </div>
+      <button class="primary-btn" id="releaseBtn">呼气，就是现在 ↓</button>`);
+    startBreath(['松开…','吸气…','松开…']);
+    const btn=document.getElementById('releaseBtn');
+    btn.onclick=()=>{
+      stopBreath();
+      commitRelease();
+      btn.textContent='已松开，正在回看…';btn.disabled=true;
+      setTimeout(()=>{flow.step=7;renderFlow();},1400);
+    };
+  }
+  else if(s===7){
+    const rec=state.records[state.records.length-1];
+    flowShell(`
+      <div class="step-tag">STEP 7 · 回看</div>
+      <div class="step-title">这一下，已经松开了</div>
+      <div class="step-desc">本次释放 <strong style="color:var(--accent)">${rec?rec.time:''}</strong> · ${esc(flow.emotion)}${flow.want?' · '+wantName(flow.want):''}<br>感受一下，这股情绪还在吗？</div>
+      <div class="choice-grid">
+        <button class="choice-btn primary" id="sameEmo">这股情绪还在，继续释放它</button>
+        <button class="choice-btn" id="newEmo">换一个情绪，重新选</button>
+        <button class="choice-btn" id="writeDiary">写一篇日记</button>
+        <button class="choice-btn" id="goHome">平静了，回首页</button>
+      </div>`);
+    document.getElementById('sameEmo').onclick=()=>{flow.step=3;renderFlow();};
+    document.getElementById('newEmo').onclick=()=>{flow.step=1;flow.emotion='';flow.level='';flow.want='';renderFlow();};
+    document.getElementById('writeDiary').onclick=()=>openDiaryEditor({targetId:flow.targetId,emotion:flow.emotion});
+    document.getElementById('goHome').onclick=()=>{showPage('home');renderHome();};
+  }
+  /* 切换针对的目标 */
+  const ftp=document.getElementById('ftpChange');
+  if(ftp)ftp.onclick=()=>{
+    const i=state.targets.findIndex(x=>x.id===flow.targetId);
+    flow.targetId=state.targets[(i+1)%state.targets.length].id;
+    const nt=state.targets.find(x=>x.id===flow.targetId);
+    renderFlow();toast('现在针对：'+(nt?nt.text:''));
+  };
+}
+function wantName(k){const w=WANTS.find(x=>x.k===k);return w?w.n:'';}
+function commitRelease(){
+  const t=state.targets.find(x=>x.id===flow.targetId);
+  const rec={id:uid(),date:todayKey(),time:nowTime(),ts:Date.now(),
+    targetId:flow.targetId,cat:t?t.cat:'other',emotion:flow.emotion,level:flow.level,want:flow.want};
+  state.records.push(rec);save();
+}
+function startBreath(labels){
+  const bc=document.getElementById('bc');if(!bc)return;
+  let phase=0;
+  const seq=[['inhale',labels[1]||'吸气…',4000],['hold',labels[1]||'屏住…',2000],['exhale',labels[0]||'松开…',6000]];
+  function tick(){
+    if(!document.getElementById('bc'))return;
+    const[cls,label]=seq[phase];
+    bc.className='breath-circle '+cls;bc.textContent=label;
+    breathTimer=setTimeout(()=>{phase=(phase+1)%3;tick();},cls==='inhale'?4000:cls==='hold'?2000:6000);
+  }
+  bc.className='breath-circle';bc.textContent=labels[0];
+  breathTimer=setTimeout(tick,600);
+}
+function stopBreath(){if(breathTimer){clearTimeout(breathTimer);breathTimer=null;}}
+
+/* ========== 九大情绪表弹层 ========== */
+function openEmoSheet(ctx){
+  ctx=ctx||'flow';
+  const modal=document.getElementById('emoModal');
+  modal.innerHTML=`
+    <div class="modal-title">九大情绪层级（AGFLAP → CAP）<button class="close-btn" data-close>✕</button></div>
+    <div class="step-desc" style="margin-bottom:14px">${ctx==='home'
+      ? '从低层（冷漠/悲伤/恐惧…）到高层（勇气/接纳/平静）。点任意词先记住，点「开始释放」会自动带入第一步。'
+      : '从低层（冷漠/悲伤/恐惧…）到高层（勇气/接纳/平静）。点任意词即选为当前情绪。'}</div>
+    ${EMO_LEVELS.map((lv,i)=>`
+      <div class="emo-level" data-i="${i}">
+        <div class="emo-level-head">
+          <span class="emo-level-name">${lv.n}</span>
+          <span class="emo-level-arrow">展开 ▾</span>
+        </div>
+        <div class="emo-words">${lv.words.map(w=>`<span class="emo-word" data-w="${w}" data-lv="${lv.n}">${w}</span>`).join('')}</div>
+      </div>`).join('')}`;
+  document.getElementById('emoMask').classList.add('show');
+  modal.querySelectorAll('.emo-level-head').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
+  modal.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getElementById('emoMask').classList.remove('show'));
+  const pickWord=(w,lv)=>{
+    document.getElementById('emoMask').classList.remove('show');
+    /* 把词加到快捷胶囊，下次直接点 */
+    if(!state.customEmos.includes(w)&&!QUICK_EMOS.includes(w)){
+      state.customEmos.push(w);save();
+    }
+    if(ctx==='flow'&&flow){
+      flow.emotion=w;flow.level=lv||'';
+      renderFlow();
+    }else{
+      state.pendingEmotion=w;state.pendingLevel=lv||'';save();
+      toast('已选：'+w+'，已加到快捷情绪');
+    }
+  };
+  modal.querySelectorAll('.emo-word').forEach(w=>w.onclick=()=>pickWord(w.dataset.w,w.dataset.lv));
+}
+
+/* ========== 记录页 ========== */
+function streakDays(){
+  if(!state.records.length)return 0;
+  const days=[...new Set(state.records.map(r=>r.date))].sort();
+  let streak=0;const d=new Date();
+  // 今天没记录则从昨天起算
+  if(!days.includes(todayKey(d)))d.setDate(d.getDate()-1);
+  while(true){const k=todayKey(d);if(days.includes(k)){streak++;d.setDate(d.getDate()-1);}else break;}
+  return streak;
+}
+function dayCount(key){return state.records.filter(r=>r.date===key).length;}
+function renderRecord(){
+  const today=todayKey();
+  const todayRecs=state.records.filter(r=>r.date===today);
+  const total=state.records.length;
+  if(!state.calMonth)state.calMonth=today.slice(0,7);
+  const[yy,mm]=state.calMonth.split('-').map(Number);
+  const first=new Date(yy,mm-1,1);const startWd=first.getDay();const daysInMonth=new Date(yy,mm,0).getDate();
+  const maxCount=Math.max(1,...state.records.filter(r=>r.date.startsWith(state.calMonth)).map(r=>dayCount(r.date)));
+  let cells='';
+  for(let i=0;i<startWd;i++)cells+=`<div class="calendar-day"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const key=`${yy}-${String(mm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const c=dayCount(key);
+    const lv=c===0?0:Math.min(5,Math.ceil(c/maxCount*5));
+    const isToday=key===today;
+    const sel=state.selDay===key;
+    const bg=c?`background:var(--accent);opacity:${0.35+lv*0.13};${lv>=4?'color:#fff':''}`:'background:rgba(120,100,110,.08)';
+    const size=lv>=4?34:lv>=2?32:30;
+    cells+=`<div class="calendar-day"><div class="day-ball ${isToday?'today':''} ${sel?'sel':''}" data-day="${key}" style="${bg};width:${size}px;height:${size}px">${d}</div></div>`;
+  }
+  const selDay=state.selDay||today;
+  const el=document.getElementById('page-record');
+  el.innerHTML=`
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">累计释放</div></div>
+      <div class="stat-card"><div class="stat-num">${todayRecs.length}</div><div class="stat-label">今日</div></div>
+      <div class="stat-card"><div class="stat-num">${streakDays()}天</div><div class="stat-label">坚持天数</div></div>
+    </div>
+    <div class="card">
+      <div class="calendar-head">
+        <button class="month-btn" id="prevM">‹</button>
+        <div class="calendar-title">${yy}年${mm}月</div>
+        <button class="month-btn" id="nextM">›</button>
+      </div>
+      <div class="calendar-grid">
+        ${['日','一','二','三','四','五','六'].map(w=>`<div class="calendar-week">${w}</div>`).join('')}
+        ${cells}
+      </div>
+      <div class="legend">少 ${[1,2,3,4,5].map(i=>`<span class="legend-dot" style="background:var(--accent);opacity:${0.35+i*0.13}"></span>`).join('')} 多</div>
+    </div>
+    <div class="card">
+      <div class="card-title">${selDay===today?'今日记录':selDay.slice(5).replace('-','月')+'日'} <span class="muted">共 ${dayCount(selDay)} 次</span></div>
+      <div id="dayDetail"></div>
+    </div>`;
+  document.getElementById('prevM').onclick=()=>{shiftMonth(-1);};
+  document.getElementById('nextM').onclick=()=>{shiftMonth(1);};
+  el.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{state.selDay=b.dataset.day;save();renderRecord();});
+  renderDayDetail(selDay);
+}
+function shiftMonth(delta){
+  let[y,m]=state.calMonth.split('-').map(Number);m+=delta;
+  if(m<1){m=12;y--;}if(m>12){m=1;y++;}
+  state.calMonth=`${y}-${String(m).padStart(2,'0')}`;save();renderRecord();
+}
+function renderDayDetail(day){
+  const recs=state.records.filter(r=>r.date===day).sort((a,b)=>a.ts-b.ts);
+  const box=document.getElementById('dayDetail');
+  if(!recs.length){box.innerHTML=`<div class="empty">这一天还没有释放记录</div>`;return;}
+  // 按目标分组（删除目标后用快照名，历史不丢）
+  const groups={};
+  recs.forEach(r=>{
+    const name=r.targetName||targetText(r.targetId)||'（已删除目标）';
+    groups[r.targetId]=groups[r.targetId]||{target:name,recs:[]};groups[r.targetId].recs.push(r);
+  });
+  let html=Object.values(groups).map(g=>{
+    const emoCount={};
+    g.recs.forEach(r=>{if(r.emotion)emoCount[r.emotion]=(emoCount[r.emotion]||0)+1;});
+    const emoStr=Object.entries(emoCount).map(([e,c])=>`${e}×${c}`).join('、');
+    return `<div class="record-item">
+      <div>目标 <strong>${esc(g.target)}</strong> · ${g.recs.length}次</div>
+      <div class="record-line">— ${emoStr||'未记录情绪'}</div>
+    </div>`;
+  }).join('');
+  // 逐次明细
+  html+=`<div class="setting-section">逐次明细</div>`;
+  html+=recs.map(r=>{
+    const t=state.targets.find(x=>x.id===r.targetId);
+    return `<div class="record-item">
+      <span class="record-time">${r.time==='早前'?'早前':r.time}</span>${esc(r.emotion||'未命名情绪')}
+      <div class="record-line">${esc(t?t.text:'（已删除目标）')}${r.want?' · '+wantName(r.want):''}</div>
+    </div>`;
+  }).join('');
+  box.innerHTML=html;
+}
+
+/* ========== 日记页 ========== */
+function peaceDay(){
+  const times=[...state.records.map(r=>r.ts),...state.diaries.map(d=>d.ts)];
+  if(!times.length)return 1;
+  return Math.max(1,Math.floor((Date.now()-Math.min(...times))/86400000)+1);
+}
+function renderDiary(){
+  const el=document.getElementById('page-diary');
+  const sorted=[...state.diaries].sort((a,b)=>b.ts-a.ts);
+  let html=`<button class="primary-btn" id="newDiary" style="margin-bottom:16px">＋ 写一篇日记</button>`;
+  if(!sorted.length){
+    html+=`<div class="card"><div class="empty">还没有日记。<br>释放结束后记下一笔，或点上方按钮写点什么。</div></div>`;
+  }else{
+    let lastDate='';
+    sorted.forEach(d=>{
+      if(d.date!==lastDate){lastDate=d.date;html+=`<div class="diary-date-group">${d.date.slice(5).replace('-','月')+'日'}</div>`;}
+      const t=state.targets.find(x=>x.id===d.targetId);
+      html+=`<div class="card diary-item" data-did="${d.id}">
+        <div class="diary-head">
+          <div class="avatar">${state.profile.avatar?`<img src="${state.profile.avatar}">`:esc((state.profile.name||'旅')[0])}</div>
+          <div style="flex:1">
+            <div class="diary-author">${esc(state.profile.name||'旅人')}</div>
+            <div class="diary-time">${d.time}${d.emotion?' · '+esc(d.emotion):''}</div>
+          </div>
+        </div>
+        <div class="diary-text">${esc(d.text)}</div>
+        ${t?`<span class="tag ${t.cat}" style="margin-top:10px">${esc(t.text)}</span>`:''}
+      </div>`;
+    });
+  }
+  el.innerHTML=html;
+  document.getElementById('newDiary').onclick=()=>openDiaryEditor({});
+  el.querySelectorAll('[data-did]').forEach(c=>c.onclick=()=>openDiaryDetail(c.dataset.did));
+}
+function openDiaryEditor(prefill){
+  const modal=document.getElementById('diaryModal');
+  const tOpts=state.targets.map(t=>`<option value="${t.id}" ${prefill.targetId===t.id?'selected':''}>${esc(t.text)}</option>`).join('');
+  modal.innerHTML=`
+    <div class="modal-title">写一篇日记<button class="close-btn" data-close>✕</button></div>
+    <div class="setting-row" style="display:block">
+      <label>关联目标（可选）</label>
+      <select class="input" id="dTarget" style="margin-top:8px;width:100%">
+        <option value="">不关联</option>${tOpts}
+      </select>
+    </div>
+    <div class="setting-row" style="display:block">
+      <label>此刻情绪（可选）</label>
+      <input class="input" id="dEmo" style="margin-top:8px;width:100%" placeholder="如「平静」" maxlength="12" value="${esc(prefill.emotion||'')}">
+    </div>
+    <textarea class="input" id="dText" rows="7" style="width:100%;resize:none;margin-top:8px" placeholder="此刻想说点什么……"></textarea>
+    <button class="primary-btn" id="saveDiary" style="margin-top:14px">保存</button>`;
+  document.getElementById('diaryMask').classList.add('show');
+  modal.querySelector('[data-close]').onclick=()=>document.getElementById('diaryMask').classList.remove('show');
+  setTimeout(()=>document.getElementById('dText').focus(),100);
+  document.getElementById('saveDiary').onclick=()=>{
+    const text=document.getElementById('dText').value.trim();
+    if(!text){toast('写点什么再保存');return;}
+    const targetId=document.getElementById('dTarget').value||null;
+    const emotion=document.getElementById('dEmo').value.trim();
+    const d=new Date();
+    state.diaries.push({id:uid(),date:todayKey(d),time:nowTime(),ts:Date.now(),targetId,emotion,text});
+    save();document.getElementById('diaryMask').classList.remove('show');
+    toast('日记已保存');
+    if(document.getElementById('page-diary').classList.contains('active'))renderDiary();
+  };
+}
+function openDiaryDetail(id){
+  const d=state.diaries.find(x=>x.id===id);if(!d)return;
+  const t=state.targets.find(x=>x.id===d.targetId);
+  const wd=['周日','周一','周二','周三','周四','周五','周六'][new Date(d.ts).getDay()];
+  const dateTitle=`${d.date.slice(0,4)}年${d.date.slice(5,7)}月${d.date.slice(8,10)}日 ${wd} ${d.time}`;
+  document.getElementById('detailContent').innerHTML=`
+    <div class="detail-avatar">${state.profile.avatar?`<img src="${state.profile.avatar}">`:esc((state.profile.name||'旅')[0])}</div>
+    <div class="detail-author">${esc(state.profile.name||'旅人')}</div>
+    <div class="detail-date">${dateTitle}${d.emotion?' · '+esc(d.emotion):''}</div>
+    <div class="detail-text">${esc(d.text)}</div>
+    ${t?`<div style="margin-top:24px"><span class="tag ${t.cat}">${esc(t.text)}</span></div>`:''}
+    <div class="detail-foot">与自己和解的第 ${peaceDay()} 天</div>
+    <button class="danger-btn" id="delDiary">删除这篇日记</button>`;
+  document.getElementById('diary-detail').classList.add('show');
+  document.body.classList.remove('shot-mode');
+  document.getElementById('delDiary').onclick=async()=>{
+    const ok=await cfDialog('删除这篇日记？','删了就找不回来啦。','删除');
+    if(!ok)return;
+    state.diaries=state.diaries.filter(x=>x.id!==id);save();
+    document.getElementById('diary-detail').classList.remove('show');renderDiary();
+  };
+}
+document.getElementById('detailClose').onclick=()=>document.getElementById('diary-detail').classList.remove('show');
+document.getElementById('shotBtn').onclick=()=>{
+  document.body.classList.toggle('shot-mode');
+  toast(document.body.classList.contains('shot-mode')?'截图模式：点文字区恢复':'已退出截图模式');
+};
+document.getElementById('detailContent').addEventListener('click',()=>{
+  if(document.body.classList.contains('shot-mode'))document.body.classList.remove('shot-mode');
+});
+
+/* ========== 设置中心 ========== */
+function openSettings(){
+  const modal=document.getElementById('settingsModal');
+  modal.innerHTML=`
+    <div class="modal-title">设置 <button class="close-btn" data-close>✕</button></div>
+
+    <div class="setting-section">个人资料</div>
+    <div class="avatar-upload">
+      <div class="avatar" id="setAvatar">${state.profile.avatar?`<img src="${state.profile.avatar}">`:esc((state.profile.name||'旅')[0])}</div>
+      <div class="avatar-actions">
+        <button class="mini-btn" id="avatarBtn">更换头像</button>
+        <button class="mini-btn" id="avatarRm">移除头像</button>
+      </div>
+    </div>
+    <div class="setting-row" style="display:block;margin-top:12px">
+      <input class="input" id="nameInput" style="width:100%" placeholder="你的名字" maxlength="10" value="${esc(state.profile.name)}">
+    </div>
+    <button class="secondary-btn" id="saveProfile">保存资料</button>
+
+    <div class="setting-section">壁纸主题</div>
+    <div class="theme-options">
+      <div class="theme-option ${state.theme==='pink'?'sel':''}" data-t="pink" title="雾粉"></div>
+      <div class="theme-option ${state.theme==='blue'?'sel':''}" data-t="blue" title="雾蓝"></div>
+      <div class="theme-option ${state.theme==='beige'?'sel':''}" data-t="beige" title="奶咖"></div>
+      <div class="theme-option ${state.theme==='green'?'sel':''}" data-t="green" title="雾绿"></div>
+      <div class="theme-option ${state.theme==='wallpaper'?'sel':''}" data-t="wallpaper" title="跟随壁纸"></div>
+    </div>
+    <div class="upload-area" id="wallpaperBtn" style="margin-top:14px">用自己的图片做壁纸（上传后主题色自动从壁纸提取）</div>
+    <div class="setting-row" style="gap:8px">
+      <input class="input" id="wallUrl" placeholder="或粘贴图片链接 https://…" style="flex:1">
+      <button class="mini-btn" id="wallUrlBtn" style="height:42px">应用</button>
+    </div>
+    <button class="secondary-btn" id="resetWall">恢复默认壁纸</button>
+
+    <div class="setting-section">卡片磨砂浓度</div>
+    <div class="alpha-row">
+      <input type="range" id="cardRange" min="0" max="100" step="1" value="${typeof state.cardAlpha==='number'?state.cardAlpha:80}">
+      <span id="cardVal">${typeof state.cardAlpha==='number'?state.cardAlpha:80}</span>
+    </div>
+    <div class="setting-hint">往左更透，壁纸能看清</div>
+
+    <div class="setting-section">字体</div>
+    <div class="theme-options" id="fontOptions">
+      <button class="cat-chip ${state.font==='sans'?'sel':''}" data-f="sans" style="font-family:'Noto Sans SC'">清爽黑体</button>
+      <button class="cat-chip ${state.font==='round'?'sel':''}" data-f="round">圆润体</button>
+      <button class="cat-chip ${state.font==='serif'?'sel':''}" data-f="serif" style="font-family:'Noto Serif SC'">宋体</button>
+    </div>
+    <div class="upload-area" id="fontBtn" style="margin-top:12px">上传自己的字体文件（.ttf/.otf/.woff）</div>
+
+    <div class="setting-section">数据备份</div>
+    <button class="secondary-btn" id="exportBtn">导出数据备份（.json）</button>
+    <button class="secondary-btn" id="importBtn">导入备份恢复</button>
+
+    <div class="setting-section">危险操作</div>
+    <button class="danger-btn" id="clearBtn">清空本机全部数据</button>
+    <div style="height:10px"></div>`;
+  document.getElementById('settingsMask').classList.add('show');
+  modal.querySelector('[data-close]').onclick=()=>document.getElementById('settingsMask').classList.remove('show');
+  document.getElementById('saveProfile').onclick=()=>{
+    state.profile.name=document.getElementById('nameInput').value.trim()||'旅人';
+    save();renderTop();renderHome();openSettings();toast('资料已保存');
+  };
+  document.getElementById('avatarBtn').onclick=()=>document.getElementById('avatarInput').click();
+  document.getElementById('avatarRm').onclick=()=>{state.profile.avatar='';save();renderTop();openSettings();};
+  modal.querySelectorAll('.theme-option').forEach(o=>o.onclick=()=>{
+    state.theme=o.dataset.t;
+    if(state.theme==='wallpaper'&&!state.wallpaper){toast('请先上传壁纸');state.theme='pink';}
+    save();applyTheme();openSettings();
+  });
+  document.getElementById('wallpaperBtn').onclick=()=>document.getElementById('wallpaperInput').click();
+  document.getElementById('wallUrlBtn').onclick=()=>{
+    const url=document.getElementById('wallUrl').value.trim();if(!url)return;
+    urlToDataUrl(url,dataUrl=>{
+      state.wallpaper=dataUrl;state.theme='wallpaper';save();applyTheme();openSettings();toast('壁纸已应用，主题已跟随');
+    },()=>toast('图片链接读取失败，可改存为图片后上传'));
+  };
+  document.getElementById('resetWall').onclick=()=>{state.wallpaper='';state.theme='pink';save();applyTheme();openSettings();toast('已恢复默认');};
+  const cr=document.getElementById('cardRange');
+  if(cr)cr.oninput=()=>{state.cardAlpha=+cr.value;document.getElementById('cardVal').textContent=cr.value;save();applyTheme();};
+  document.getElementById('fontOptions').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
+    state.font=b.dataset.f;save();applyTheme();openSettings();
+  });
+  document.getElementById('fontBtn').onclick=()=>document.getElementById('fontInput').click();
+  document.getElementById('exportBtn').onclick=exportData;
+  document.getElementById('importBtn').onclick=()=>document.getElementById('importInput').click();
+  document.getElementById('clearBtn').onclick=async()=>{
+    const ok=await cfDialog('清空全部数据？','所有目标、记录、日记都会删掉，建议先导出备份。','清空');
+    if(!ok)return;
+    localStorage.removeItem(STORE_KEY);state=migrate({});applyTheme();renderTop();renderHome();
+    document.getElementById('settingsMask').classList.remove('show');toast('已清空');
+  };
+}
+document.getElementById('settingsBtn').onclick=openSettings;
+document.getElementById('settingsMask').addEventListener('click',e=>{if(e.target.id==='settingsMask')e.target.classList.remove('show');});
+document.getElementById('emoMask').addEventListener('click',e=>{if(e.target.id==='emoMask')e.target.classList.remove('show');});
+document.getElementById('diaryMask').addEventListener('click',e=>{if(e.target.id==='diaryMask')e.target.classList.remove('show');});
+
+/* 图片/字体处理 */
+function readFile(file,cb){const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file);}
+function compressImage(dataUrl,maxW,cb){
+  const img=new Image();img.onload=()=>{
+    const scale=Math.min(1,maxW/img.width);
+    const w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',0.82));
+  };img.src=dataUrl;
+}
+document.getElementById('wallpaperInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  readFile(f,d=>compressImage(d,1400,out=>{
+    state.wallpaper=out;state.theme='wallpaper';save();applyTheme();
+    if(document.getElementById('settingsMask').classList.contains('show'))openSettings();
+    toast('壁纸已应用，主题色已跟随');
+  }));e.target.value='';
+});
+document.getElementById('avatarInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  readFile(f,d=>compressImage(d,200,out=>{state.profile.avatar=out;save();renderTop();openSettings();}));
+  e.target.value='';
+});
+document.getElementById('fontInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  toast('正在加载字体…');
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const ff=new FontFace('customFont',r.result,{display:'swap'});
+      ff.load().then(()=>{
+        document.fonts.add(ff);
+        document.body.style.fontFamily="'customFont',sans-serif";
+        state.font='custom';save();toast('字体已应用');
+      }).catch(err=>{console.error('font load:',err);toast('字体加载失败，换小一点的试试');});
+    }catch(err){console.error('font create:',err);toast('这个字体格式不支持');}
+  };
+  r.onerror=()=>toast('读取文件失败');
+  r.readAsArrayBuffer(f);
+  e.target.value='';
+});
+function urlToDataUrl(url,ok,fail){
+  const img=new Image();img.crossOrigin='anonymous';
+  img.onload=()=>{try{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);compressImage(c.toDataURL('image/jpeg'),1400,ok);}catch(e){fail();}};
+  img.onerror=fail;img.src=url;
+}
+/* 数据备份 */
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='情绪释放备份-'+todayKey()+'.json';a.click();URL.revokeObjectURL(a.href);
+  toast('备份已导出');
+}
+document.getElementById('importInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{
+    try{const d=JSON.parse(r.result);state=migrate(d);save();applyTheme();renderTop();renderHome();
+      document.getElementById('settingsMask').classList.remove('show');toast('备份已导入');}
+    catch(err){toast('备份文件无法识别');}
+  };r.readAsText(f);e.target.value='';
+});
+
+/* ========== 初始化 ========== */
+applyTheme();renderTop();renderHome();
+</script>
+</body>
+</html>
