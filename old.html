@@ -1032,6 +1032,7 @@ function startRelease(gid){
   R.selected=[];
   R.locked=false;
   R.round=[];
+  R.page=[];
 
   document.getElementById('relGoal').textContent=g.name;
   resetReleaseView();
@@ -1053,11 +1054,25 @@ function updateTimer(){
 /* 顺序开关：默认关闭打乱，任何一轮都不会自己重新排位 */
 function orderFixed(){ return state.fixedOrder!==false; }
 
-/* 固定顺序：永远按你录入的先后，从上往下取还没释放的前 3 条，不轮转、不洗牌 */
+/* 固定顺序：这一组三张卡位置钉死，三张都点过才换下一组，绝不中途挪位 */
 function fixedPick(g){
+  var ids=g.desires.map(function(d){ return d.id; });
+  var page=(R.page||[]).filter(function(id){ return ids.indexOf(id)>=0; });
+  var stillHere=page.map(function(id){
+    return g.desires.find(function(x){ return x.id===id; });
+  }).filter(Boolean);
+  var anyUn=stillHere.some(function(d){ return !d.released; });
+  if(stillHere.length && anyUn){ return stillHere; }
+
   var left=g.desires.filter(function(d){ return !d.released; });
-  if(!left.length) return [];
-  return left.slice(0,3);
+  if(!left.length){
+    g.desires.forEach(function(d){ d.released=false; });
+    saveGoals();
+    left=g.desires.slice();
+  }
+  var out=left.slice(0,3);
+  R.page=out.map(function(d){ return d.id; });
+  return out;
 }
 
 function nextRound(){
@@ -1341,25 +1356,14 @@ function bind(){
   });
 
   // 释放页卡片（委托到外层，避免完成视图重建后失效）
-  // 按下记位置，抬手时若没怎么滑动就算选它（防误触滚动，同时不拖时间）
-  var tapC=null, tapX=0, tapY=0;
-  var relEl=document.getElementById('releasePage');
-  relEl.addEventListener('pointerdown', function(e){
+  // 选卡：用 click（最稳），按下瞬间靠 :active 给视觉反馈，点完立刻换下一轮
+  document.getElementById('releasePage').addEventListener('click', function(e){
     var c=e.target.closest('.rcard');
-    if(!c||!c.dataset.pick){ tapC=null; return; }
-    tapC=c; tapX=e.clientX; tapY=e.clientY;
-    c.style.background='rgba(255,255,255,.52)';
-  }, {passive:true});
-  relEl.addEventListener('pointerup', function(e){
-    var c=e.target.closest('.rcard');
-    if(tapC && c===tapC && Math.abs(e.clientX-tapX)<14 && Math.abs(e.clientY-tapY)<14){
-      tapC=null;
-      pickCard(c.dataset.pick,c);
-    }else{
-      tapC=null;
-    }
-  }, {passive:true});
-  relEl.addEventListener('pointercancel', function(){ tapC=null; }, {passive:true});
+    if(!c||!c.dataset.pick) return;
+    if(c.dataset.tapped==='1') return;
+    c.dataset.tapped='1';
+    pickCard(c.dataset.pick,c);
+  });
   document.getElementById('endBtn').addEventListener('click', endReleaseClick);
 
   // 壁纸
