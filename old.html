@@ -242,8 +242,13 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
   box-shadow:var(--shadow-s);
   font-size:15px;line-height:1.6;color:var(--ink);
   cursor:pointer;word-break:break-word;
+  transition:transform .15s,opacity .18s,background .15s;
 }
-.rcard:active{background:rgba(255,255,255,.52);}
+.rcard{
+}
+.rcard:active{transform:scale(.975);background:rgba(255,255,255,.46);}
+.rcard.picked{transform:scale(1.03);background:rgba(255,255,255,.66);}
+.rcard.away{opacity:0;transform:translateY(-14px) scale(.96);}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 .rel-bottom{display:flex;justify-content:flex-end;padding-top:10px;}
 .end-btn{
@@ -1054,24 +1059,15 @@ function updateTimer(){
 /* 顺序开关：默认关闭打乱，任何一轮都不会自己重新排位 */
 function orderFixed(){ return state.fixedOrder!==false; }
 
-/* 固定顺序：这一组三张卡位置钉死，三张都点过才换下一组，绝不中途挪位 */
+/* 固定顺序：按你录入的先后，一页三张、点一下翻到下一页，永远不洗牌 */
 function fixedPick(g){
-  var ids=g.desires.map(function(d){ return d.id; });
-  var page=(R.page||[]).filter(function(id){ return ids.indexOf(id)>=0; });
-  var stillHere=page.map(function(id){
-    return g.desires.find(function(x){ return x.id===id; });
-  }).filter(Boolean);
-  var anyUn=stillHere.some(function(d){ return !d.released; });
-  if(stillHere.length && anyUn){ return stillHere; }
-
-  var left=g.desires.filter(function(d){ return !d.released; });
-  if(!left.length){
-    g.desires.forEach(function(d){ d.released=false; });
-    saveGoals();
-    left=g.desires.slice();
-  }
-  var out=left.slice(0,3);
-  R.page=out.map(function(d){ return d.id; });
+  var n=g.desires.length;
+  if(n<=3) return g.desires.slice();
+  var ptr=Math.max(0,(g.ptr|0)%n);
+  var out=[];
+  for(var k=0;k<3;k++){ out.push(g.desires[(ptr+k)%n]); }
+  g.ptr=(ptr+3)%n;
+  saveGoals();
   return out;
 }
 
@@ -1131,7 +1127,11 @@ function pickCard(did, el){
   R.selected.push(d.text);
   saveGoals();
 
-  nextRound();
+  var others=document.querySelectorAll('#relCards .rcard');
+  others.forEach(function(o){ if(o!==el) o.classList.add('away'); });
+  if(el&&el.classList) el.classList.add('picked');
+  setTimeout(function(){ if(el&&el.classList) el.classList.add('away'); },110);
+  setTimeout(function(){ nextRound(); },300);
 }
 
 function finishRelease(userEnded){
