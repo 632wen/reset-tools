@@ -1053,16 +1053,11 @@ function updateTimer(){
 /* 顺序开关：默认关闭打乱，任何一轮都不会自己重新排位 */
 function orderFixed(){ return state.fixedOrder!==false; }
 
-/* 固定顺序时按录入顺序分页取 3 条，页面之间不重叠，位置永远对得上 */
+/* 固定顺序：永远按你录入的先后，从上往下取还没释放的前 3 条，不轮转、不洗牌 */
 function fixedPick(g){
-  var n=g.desires.length;
-  if(n<=3) return g.desires.slice();
-  var ptr=Math.max(0,(g.ptr|0)%n);
-  var out=[];
-  for(var k=0;k<3;k++){ out.push(g.desires[(ptr+k)%n]); }
-  g.ptr=(ptr+3)%n;
-  saveGoals();
-  return out;
+  var left=g.desires.filter(function(d){ return !d.released; });
+  if(!left.length) return [];
+  return left.slice(0,3);
 }
 
 function nextRound(){
