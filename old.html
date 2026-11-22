@@ -44,9 +44,9 @@ body{
 .hidden{display:none !important;}
 /* 文件选择器：不隐藏，只在视觉上移出屏幕，兼容手机浏览器原生触发 */
 .filepick{
-  position:absolute;left:-9999px;top:0;
+  position:fixed;left:0;top:0;
   width:1px;height:1px;opacity:0;overflow:hidden;
-  border:0;padding:0;margin:0;
+  border:0;padding:0;margin:0;pointer-events:none;z-index:-1;
 }
 label.btn{display:flex;align-items:center;justify-content:center;text-align:center;}
 
@@ -1367,6 +1367,22 @@ function bind(){
     renderSettingsPage();
     toast(state.fixedOrder?'固定顺序已开启':'已切换为每轮随机');
   });
+  // 打开文件选择器时防止页面跳到顶部
+  (function(){
+    var savedY=null;
+    function saveY(){ savedY=window.scrollY; }
+    function restoreY(){ if(savedY!=null){ var y=savedY; window.scrollTo(0,y); requestAnimationFrame(function(){window.scrollTo(0,y);}); } }
+    document.addEventListener('pointerdown', function(e){
+      var lb=e.target.closest && e.target.closest('label[for="wallFile"],label[for="fontFile"],label[for="importFile"]');
+      if(lb) saveY();
+    }, true);
+    ['wallFile','fontFile','importFile'].forEach(function(id){
+      var el=document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('focus', function(){ if(savedY!=null) setTimeout(restoreY,0); });
+      el.addEventListener('change', function(){ setTimeout(restoreY,30); });
+    });
+  })();
   document.getElementById('wallFile').addEventListener('change', function(e){
     var f=e.target.files&&e.target.files[0];
     if(!f){ return; }
