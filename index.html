@@ -780,6 +780,16 @@ function applyTone(){
   document.body.dataset.tone=tone;
   document.documentElement.dataset.tone=tone;
   document.documentElement.style.colorScheme=(tone==='light'?'light':'dark');
+  /* 页面底色跟着壁纸走，避免上下滑到尽头露出黑色底 */
+  (function(){
+    const src=wallRGB||(tone==='light'?[240,235,236]:[8,19,27]);
+    const mix=(v,to,p)=>Math.round(v*(1-p)+to*p);
+    const bg=tone==='light'
+      ? 'rgb('+mix(src[0],255,.62)+','+mix(src[1],255,.62)+','+mix(src[2],255,.62)+')'
+      : 'rgb('+mix(src[0],6,.45)+','+mix(src[1],12,.45)+','+mix(src[2],18,.45)+')';
+    document.documentElement.style.background=bg;
+    document.body.style.backgroundColor='transparent';
+  })();
   const meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.setAttribute('content',tone==='light'?'#dfe5e3':'#08131b');
   applyGlassTint();
