@@ -33,7 +33,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 #wall{
-  position:fixed;inset:0;z-index:-2;
+  position:fixed;left:0;top:0;width:100vw;height:100vh;height:100lvh;z-index:-2;pointer-events:none;
   background:linear-gradient(160deg,#f3e0e5 0%,#e8dde8 48%,#f4ecf0 100%);
   background-size:cover;background-position:center;
   transition:background .3s;
@@ -76,7 +76,7 @@ label.btn{display:flex;align-items:center;justify-content:center;text-align:cent
   background:var(--glass);
   border:1px solid var(--line);
   border-radius:var(--r);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
   box-shadow:var(--shadow);
   padding:16px;margin-bottom:14px;
 }
@@ -146,7 +146,7 @@ label.btn{display:flex;align-items:center;justify-content:center;text-align:cent
   position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom,0px));
   z-index:30;width:54px;height:54px;border-radius:50%;
   border:1px solid var(--line);background:var(--glass-2);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
   color:var(--ink);font-size:26px;line-height:1;font-weight:300;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 8px 24px rgba(122,102,122,.18);cursor:pointer;
@@ -211,6 +211,7 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
 /* 释放页 */
 #releasePage{
   position:fixed;inset:0;z-index:60;display:none;flex-direction:column;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
   padding:0 18px calc(26px + env(safe-area-inset-bottom,0px));
   background-color:#f5e7ec;
   background:linear-gradient(160deg,#f3e0e5 0%,#e8dde8 48%,#f4ecf0 100%);
@@ -239,7 +240,6 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
   font-size:15px;line-height:1.6;color:var(--ink);
   cursor:pointer;word-break:break-word;
   transition:transform .14s,opacity .16s,background .15s;
-  animation:cardIn .22s ease both;
 }
 .rcard:active{transform:scale(.975);background:rgba(255,255,255,.42);}
 .rcard.picked{transform:scale(1.04);background:rgba(255,255,255,.62);}
@@ -683,7 +683,8 @@ function applyWall(){
   if(state.wall.type==='preset'){
     var p=PRESETS.find(function(x){ return x.key===state.wall.value; })||PRESETS[0];
     applyTint(p.rgb,1);
-    [el,rel].forEach(function(node){
+    if(rel){rel.style.background='transparent';}
+    [el].forEach(function(node){
       if(!node) return;
       node.style.background='none';
       node.style.backgroundImage=p.css;
@@ -695,9 +696,9 @@ function applyWall(){
     idbGet(state.wall.fileId).then(function(blob){
       if(!blob) return;
       var url=URL.createObjectURL(blob);
-      [el,rel].forEach(function(node){
+      [el].forEach(function(node){
         if(!node) return;
-        node.style.background='#eee8ea';
+        node.style.background='rgba(250,245,247,.68)';
         node.style.backgroundImage='url('+url+')';
         node.style.backgroundSize='cover';
         node.style.backgroundPosition='center';
@@ -1351,11 +1352,13 @@ function bind(){
   });
 
   // 释放页卡片（委托到外层，避免完成视图重建后失效）
-  document.getElementById('releasePage').addEventListener('click', function(e){
+  document.getElementById('releasePage').addEventListener('pointerdown', function(e){
     var c=e.target.closest('.rcard');
     if(!c||!c.dataset.pick) return;
+    if(c.dataset.tapped) return;
+    c.dataset.tapped='1';
     pickCard(c.dataset.pick,c);
-  });
+  }, {passive:true});
   document.getElementById('endBtn').addEventListener('click', endReleaseClick);
 
   // 壁纸
