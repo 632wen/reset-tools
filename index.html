@@ -260,11 +260,9 @@ body[data-tone="light"] .toast{background:rgba(20,40,52,.9)}
 .sec{font-size:11px;letter-spacing:.22em;color:var(--ink-2);margin:26px 4px 10px;text-transform:uppercase}
 </style>
 <style>
-html{color-scheme:light}
-html::-webkit-scrollbar{width:7px;height:7px}
-html::-webkit-scrollbar-track{background:transparent}
-html::-webkit-scrollbar-thumb{background:rgba(20,40,55,.22);border-radius:8px}
-html[data-tone="dark"]::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28)}
+html{color-scheme:light;scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,html *::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+html,body{overscroll-behavior:none}
 </style>
 </head>
 <body data-tone="dark">

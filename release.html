@@ -115,6 +115,8 @@ body.has-wallpaper::before{
 .cat-chip.money{--c:#C9A98A}.cat-chip.health{--c:#9CBFA8}.cat-chip.relation{--c:#B8A6C9}
 .cat-chip.study{--c:#9FB6D0}.cat-chip.career{--c:#C9B49A}.cat-chip.self{--c:#C9A6B8}.cat-chip.other{--c:#B0A8AC}
 .cat-chip.sel{background:var(--c);color:#fff;border-color:var(--c)}
+.cat-chip{color:#3F3540;background:rgba(255,255,255,.82);font-weight:500;opacity:1}
+.cat-chip.sel{color:#fff}
 .cat-chip.sel::before{background:#fff}
 /* 目标列表 */
 .target-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.5);margin-bottom:10px;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s}
@@ -299,11 +301,9 @@ body.shot-mode .detail-close,body.shot-mode .detail-shot{display:none}
 })();
 </script>
 <style>
-html{color-scheme:light}
-html::-webkit-scrollbar{width:7px;height:7px}
-html::-webkit-scrollbar-track{background:transparent}
-html::-webkit-scrollbar-thumb{background:rgba(20,40,55,.22);border-radius:8px}
-html[data-tone="dark"]::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28)}
+html{color-scheme:light;scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,html *::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+html,body{overscroll-behavior:none}
 </style>
 </head>
 <body>
