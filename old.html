@@ -21,12 +21,13 @@
   --r-s:16px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#efe6ea;}
+html{height:100%;background:#efe6ea;}
+html,body{height:100%;}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   color:var(--ink);
-  background:#eee8ea;
+  background:transparent;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
@@ -661,9 +662,7 @@ function closeConfirm(){
 /* ===== 壁纸 ===== */
 function applyTint(rgb,strength){
   var st=document.body.style;
-  var pageBg='rgb('+Math.round(rgb[0]*.86+255*.14)+','+Math.round(rgb[1]*.86+255*.14)+','+Math.round(rgb[2]*.86+255*.14)+')';
-  document.body.style.background=pageBg;
-  document.documentElement.style.background=pageBg;
+  document.body.style.background='transparent';
   var r=rgb[0],g=rgb[1],b=rgb[2];
   // 卡片玻璃跟着壁纸色走
   st.setProperty('--glass','rgba('+r+','+g+','+b+','+(0.55*strength).toFixed(3)+')');
