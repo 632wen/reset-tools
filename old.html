@@ -237,7 +237,7 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
 .rel-cards{display:flex;flex-direction:column;gap:12px;}
 .rcard{
   padding:19px 18px;border-radius:20px;text-align:center;
-  background:rgba(255,255,255,.30);
+  background:rgba(255,255,255,.42);
   border:1px solid rgba(255,255,255,.56);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   box-shadow:var(--shadow-s);
@@ -1129,11 +1129,11 @@ function pickCard(did, el){
   others.forEach(function(o){
     if(o!==el) o.classList.add('away');
   });
-  setTimeout(function(){ el.classList.add('away'); },260);
+  setTimeout(function(){ el.classList.add('away'); },120);
 
   setTimeout(function(){
     nextRound();
-  },520);
+  },320);
 }
 
 function finishRelease(userEnded){
