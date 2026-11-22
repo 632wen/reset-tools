@@ -247,8 +247,7 @@ label.fl{display:block;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;l
 .rcard{
 }
 .rcard:active{transform:scale(.975);background:rgba(255,255,255,.46);}
-.rcard.picked{transform:scale(1.03);background:rgba(255,255,255,.66);}
-.rcard.away{opacity:0;transform:translateY(-14px) scale(.96);}
+.rcard{animation:cardIn .18s ease both;}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
 .rel-bottom{display:flex;justify-content:flex-end;padding-top:10px;}
 .end-btn{
@@ -1129,9 +1128,7 @@ function pickCard(did, el){
 
   var others=document.querySelectorAll('#relCards .rcard');
   others.forEach(function(o){ if(o!==el) o.classList.add('away'); });
-  if(el&&el.classList) el.classList.add('picked');
-  setTimeout(function(){ if(el&&el.classList) el.classList.add('away'); },110);
-  setTimeout(function(){ nextRound(); },300);
+  nextRound();
 }
 
 function finishRelease(userEnded){
