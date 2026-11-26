@@ -327,7 +327,7 @@ iframe#nl-badge-frame,#nl-badge-frame,.nl-badge-root,[id^="nl-badge"],[class^="n
       <div class="autorow"><div><div class="nm" style="font-size:13.5px">自动 +1</div><div class="ds" style="font-size:11px;color:var(--ink-3);margin-top:4px" id="autoHint"></div></div><div class="sw" id="swAuto"></div></div>
       <div class="chips" id="autoChips"></div>
       <div class="addrow" style="margin-top:10px">
-        <input id="autoCustom" type="number" inputmode="numeric" min="1" max="3600" placeholder="自定义秒数，比如 45">
+        <input id="autoCustom" type="number" inputmode="decimal" step="0.1" min="0.3" max="3600" placeholder="自定义秒数，比如 1.5">
         <button data-act="autoSet">设定间隔</button>
       </div>
     </div>
@@ -383,7 +383,7 @@ iframe#nl-badge-frame,#nl-badge-frame,.nl-badge-root,[id^="nl-badge"],[class^="n
       <div class="autorow" style="margin-top:14px"><div><div class="nm" style="font-size:13.5px">自动 +1</div><div class="ds" id="fAutoHint" style="font-size:11px;color:var(--ink-3);margin-top:4px"></div></div><div class="sw" id="fSwAuto"></div></div>
       <div class="chips" id="fAutoChips" style="margin-top:10px"></div>
       <div class="addrow" style="margin-top:10px">
-        <input id="fAutoCustom" type="number" inputmode="numeric" min="1" max="3600" placeholder="自定义间隔秒数，比如 45">
+        <input id="fAutoCustom" type="number" inputmode="decimal" step="0.1" min="0.3" max="3600" placeholder="自定义间隔秒数，比如 1.5">
         <button id="fAutoSet">设定间隔</button>
       </div>
     </div>
@@ -603,6 +603,27 @@ iframe#nl-badge-frame,#nl-badge-frame,.nl-badge-root,[id^="nl-badge"],[class^="n
       <input type="range" class="range" id="volRange" min="0" max="100" value="70">
     </div>
 
+    <div class="sec">自动 +1 的节拍音</div>
+    <div class="panel glass pad">
+      <div class="row" style="flex-direction:column;align-items:flex-start;gap:12px">
+        <div class="txt"><div class="nm">每响一下就是一次</div><div class="ds">切到别的网页也会继续响。间隔在「自动 +1」那里可以自己填，比如 1.5 秒。</div></div>
+        <div class="chips" id="beepChips">
+          <button class="chip" data-beep="tone">叮</button>
+          <button class="chip" data-beep="wood">木鱼</button>
+          <button class="chip" data-beep="drop">水滴</button>
+          <button class="chip" data-beep="bell">铃</button>
+          <button class="chip" data-beep="custom">自己传</button>
+        </div>
+        <div class="row" style="gap:10px;margin-top:2px">
+          <button class="btn ghost" data-act="previewBeep" style="min-height:38px;padding:0 16px">试听</button>
+          <label class="btn ghost" style="min-height:38px;padding:0 16px;position:relative;overflow:hidden">传一段音频
+            <input type="file" id="beepFile" accept="audio/*" style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;font-size:60px">
+          </label>
+        </div>
+        <div class="ptag" id="beepName" style="margin:0"></div>
+      </div>
+    </div>
+
     <div class="sec">交互</div>
     <div class="panel glass pad">
       <div class="row"><div class="txt"><div class="nm">卡片顺序固定</div><div class="ds">开着：释放卡片按录入顺序，不会乱跳</div></div><div class="sw on" id="swOrder"></div></div>
@@ -642,7 +663,7 @@ const CATS=['爱情','财富','健康','事业','自我概念','人际关系'];
 const LS='reset_v4';
 function defaultState(){
   return {
-    settings:{wall:'def',wallUrl:'',toneMode:'auto',font:'default',customFont:'',glass:100,sound:true,vibrate:true,volume:70,cardOrder:'fixed',mode:'countdown',autoOn:false,autoSec:3,countMode:'today'},
+    settings:{wall:'def',wallUrl:'',toneMode:'auto',font:'default',customFont:'',glass:100,sound:true,vibrate:true,volume:70,cardOrder:'fixed',mode:'countdown',autoOn:false,autoSec:3,beep:'tone',beepName:'',countMode:'today'},
     counts:{}, focus:{}, releases:{},
     affirmations:[
       {id:'a1',text:'我是稳定的、完整的、被偏爱的',cat:'自我概念'},
@@ -678,6 +699,8 @@ const DB={
 let toastT=null;
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),2100)}
 let ac=null, amb=null;
+function secTxt(v){const n=Number(v);return Number.isInteger(n)?String(n):String(Math.round(n*100)/100)}
+function autoStepMs(){return Math.max(300,Math.round((S.settings.autoSec||3)*1000))}
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==='suspended')ac.resume();return ac}
 function tone(freq,dur,type){
   if(!S.settings.sound)return;const c=audio();if(!c)return;
@@ -868,48 +891,89 @@ let autoTimer=null,autoBeep=null,autoLast=0;
 function stopAutoBeep(){
   if(autoBeep){try{autoBeep.stop()}catch(e){}try{autoBeep.disconnect()}catch(e){}autoBeep=null}
 }
+let customBuf=null;
+function beepFrame(c,step){
+  const n=Math.max(64,Math.round(c.sampleRate*step));
+  const buf=c.createBuffer(1,n,c.sampleRate),d=buf.getChannelData(0);
+  const amp=(S.settings.volume/100)*.2;
+  const type=S.settings.beep||'tone';
+  const sec=c.sampleRate;
+  if(type==='custom'&&customBuf){
+    const src=customBuf.getChannelData(0),ratio=customBuf.sampleRate/c.sampleRate;
+    const len=Math.min(n,Math.floor(src.length/ratio));
+    for(let i=0;i<len;i++)d[i]=src[Math.floor(i*ratio)]||0;
+    return buf;
+  }
+  if(type==='wood'){
+    const bl=Math.min(n,Math.floor(sec*.12));
+    for(let i=0;i<bl;i++){
+      const t=i/sec,env=Math.exp(-t*30)*(1-Math.exp(-t*400));
+      d[i]=(Math.sin(2*Math.PI*320*t)*.7+Math.sin(2*Math.PI*160*t)*.3+(Math.random()*2-1)*.2)*amp*env*1.1;
+    }
+  }else if(type==='drop'){
+    const bl=Math.min(n,Math.floor(sec*.24));
+    for(let i=0;i<bl;i++){
+      const t=i/sec,f=1250*Math.exp(-t*9)+420;
+      d[i]=Math.sin(2*Math.PI*f*t)*amp*Math.exp(-t*13)*(1-Math.exp(-t*180));
+    }
+  }else if(type==='bell'){
+    const bl=Math.min(n,Math.floor(sec*.3));
+    for(let i=0;i<bl;i++){
+      const t=i/sec;
+      d[i]=(Math.sin(2*Math.PI*880*t)*.62+Math.sin(2*Math.PI*1320*t)*.3+Math.sin(2*Math.PI*1760*t)*.12)*amp*Math.exp(-t*9)*(1-Math.exp(-t*220));
+    }
+  }else{
+    const bl=Math.min(n,Math.floor(sec*.18));
+    for(let i=0;i<bl;i++){
+      const t=i/sec;
+      d[i]=Math.sin(2*Math.PI*720*t)*amp*Math.exp(-t*16)*(1-Math.exp(-t*70));
+    }
+  }
+  return buf;
+}
 function startAutoBeep(){
   if(autoBeep||!S.settings.sound)return;
   const c=audio();if(!c)return;
-  const step=Math.max(1,S.settings.autoSec||3);
-  const n=Math.max(64,Math.floor(c.sampleRate*step));
-  const buf=c.createBuffer(1,n,c.sampleRate),d=buf.getChannelData(0);
-  const bl=Math.min(n,Math.floor(c.sampleRate*.18));
-  const amp=(S.settings.volume/100)*.2;
-  for(let i=0;i<bl;i++){
-    const t=i/c.sampleRate;
-    d[i]=Math.sin(2*Math.PI*720*t)*amp*Math.exp(-t*16)*(1-Math.exp(-t*70));
-  }
-  const src=c.createBufferSource();src.buffer=buf;src.loop=true;
+  const step=Math.max(.3,Number(S.settings.autoSec)||3);
+  const src=c.createBufferSource();src.buffer=beepFrame(c,step);src.loop=true;
   const g=c.createGain();g.gain.value=1;src.connect(g);g.connect(c.destination);src.start();
   autoBeep=src;
+}
+function previewBeep(){
+  if(!S.settings.sound){toast('音效开关关着，先打开');return}
+  const c=audio();if(!c)return;
+  const src=c.createBufferSource();src.buffer=beepFrame(c,Math.max(.7,Math.max(.3,Number(S.settings.autoSec)||3)));src.connect(c.destination);src.start();
 }
 function autoTick(){
   if(!S.settings.autoOn){autoLast=0;return}
   if(!(curView==='aff'||curView==='focus'||document.hidden)){autoLast=0;return}
-  const step=Math.max(1,S.settings.autoSec||3)*1000,now=Date.now();
+  const step=autoStepMs(),now=Date.now();
   if(!autoLast){autoLast=now;return}
   let n=Math.floor((now-autoLast)/step);
   if(n<=0)return;
   n=Math.min(n,600);
   autoLast+=n*step;
-  addCount(n,curView==='focus'?fcat:S.lastCat);
+  addCount(n,curView==='focus'?fcat:S.lastCat,true);
 }
 function syncAuto(){
   if(autoTimer){clearInterval(autoTimer);autoTimer=null}
   stopAutoBeep();autoLast=0;
   if(S.settings.autoOn){
-    autoTimer=setInterval(()=>autoTick(),Math.max(1,S.settings.autoSec||3)*1000);
+    autoTimer=setInterval(()=>autoTick(),autoStepMs());
     autoLast=Date.now();startAutoBeep();
   }
   if($('#swAuto'))$('#swAuto').classList.toggle('on',!!S.settings.autoOn);
-  if($('#autoHint'))$('#autoHint').textContent=S.settings.autoOn?('每 '+(S.settings.autoSec||3)+' 秒 +1'):'';
+  if($('#autoHint'))$('#autoHint').textContent=S.settings.autoOn?('每 '+secTxt(S.settings.autoSec||3)+' 秒 +1'):'';
   if($('#fSwAuto'))$('#fSwAuto').classList.toggle('on',!!S.settings.autoOn);
-  if($('#fAutoHint'))$('#fAutoHint').textContent=S.settings.autoOn?('每 '+(S.settings.autoSec||3)+' 秒 +1'):'关着';
-  if($('#fAutoChips'))$('#fAutoChips').innerHTML=[1,3,5,10,20,30,60].map(v=>'<button class="chip'+((S.settings.autoSec||3)===v?' on':'')+'" data-asec="'+v+'">'+v+' 秒</button>').join('');
-  if($('#autoChips'))$('#autoChips').innerHTML=[1,3,5,10,20,30,60].map(v=>'<button class="chip'+((S.settings.autoSec||3)===v?' on':'')+'" data-asec="'+v+'">'+v+' 秒</button>').join('');
+  if($('#fAutoHint'))$('#fAutoHint').textContent=S.settings.autoOn?('每 '+secTxt(S.settings.autoSec||3)+' 秒 +1'):'关着';
+  const BEAT_STEPS=[0.5,1,1.5,2,3,5,10,20,30,60];
+  ['#fAutoChips','#autoChips'].forEach(sel=>{
+    const el=$(sel);if(!el)return;
+    el.innerHTML=BEAT_STEPS.map(v=>'<button class="chip'+(Number(S.settings.autoSec||3)===v?' on':'')+'" data-asec="'+v+'">'+secTxt(v)+' 秒</button>').join('');
+  });
+  if($('#beepName'))$('#beepName').textContent=S.settings.beepName?('用你自己的：'+S.settings.beepName):'';
 }
-function addCount(n,cat){
+function addCount(n,cat,quiet){
   const c=cat||S.lastCat;
   const d=todayCounts();
   const v=Math.max(0,(d[c]||0)+n);
@@ -917,7 +981,7 @@ function addCount(n,cat){
   if($('#affNum'))$('#affNum').textContent=catNum(S.lastCat);
   if($('#fNum'))$('#fNum').textContent=catNum(fcat);
   syncTodayLine();
-  if(n>0){tone(720,.18);buzz(6)}
+  if(n>0&&!quiet){tone(720,.18);buzz(6)}
   renderToday();
 }
 let addCat='自我概念', libAddCat='自我概念';
@@ -1037,9 +1101,9 @@ $('#countModeChips').addEventListener('click',e=>{
 });
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act="autoSet"]');if(!b)return;
-  const v=parseInt(($('#autoCustom').value||'').trim(),10);
-  if(!v||v<1||v>3600){toast('填 1 到 3600 之间的秒数');return}
-  S.settings.autoSec=v;save();syncAuto();toast('每 '+v+' 秒加一次');
+  const v=parseFloat(($('#autoCustom').value||'').trim().replace(',','.'));
+  if(!v||v<0.3||v>3600){toast('填 0.3 到 3600 之间的秒数，可以带小数');return}
+  S.settings.autoSec=v;save();syncAuto();$('#autoCustom').value='';toast('每 '+secTxt(v)+' 秒加一次');
 });
 $('#swAuto').addEventListener('click',()=>{S.settings.autoOn=!S.settings.autoOn;save();syncAuto();toast(S.settings.autoOn?'自动 +1 开了':'自动 +1 停了')});
 $('#autoChips').addEventListener('click',e=>{const c=e.target.closest('[data-asec]');if(!c)return;S.settings.autoSec=+c.dataset.asec;save();syncAuto();toast('每 '+S.settings.autoSec+' 秒加一次')});
@@ -1093,9 +1157,9 @@ $('#fCustomMin').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDef
 $('#fSwAuto').addEventListener('click',()=>{S.settings.autoOn=!S.settings.autoOn;save();syncAuto();toast(S.settings.autoOn?'自动 +1 开了':'自动 +1 停了')});
 $('#fAutoChips').addEventListener('click',e=>{const c=e.target.closest('[data-asec]');if(!c)return;S.settings.autoSec=+c.dataset.asec;save();syncAuto();toast('每 '+S.settings.autoSec+' 秒加一次')});
 $('#fAutoSet').addEventListener('click',()=>{
-  const v=parseInt(($('#fAutoCustom').value||'').trim(),10);
-  if(!v||v<1||v>3600){toast('填 1 到 3600 之间的秒数');return}
-  S.settings.autoSec=v;save();syncAuto();$('#fAutoCustom').value='';toast('每 '+v+' 秒加一次');
+  const v=parseFloat(($('#fAutoCustom').value||'').trim().replace(',','.'));
+  if(!v||v<0.3||v>3600){toast('填 0.3 到 3600 之间的秒数，可以带小数');return}
+  S.settings.autoSec=v;save();syncAuto();$('#fAutoCustom').value='';toast('每 '+secTxt(v)+' 秒加一次');
 });
 $('#fMins').addEventListener('click',e=>{
   const b=e.target.closest('[data-fmin]');if(!b||frunning)return;
@@ -1409,6 +1473,8 @@ function renderStats(){
 /* 设置 */
 function renderSettings(){
   const st=S.settings;
+  if($('#beepChips'))$$('#beepChips .chip').forEach(c=>c.classList.toggle('on',(st.beep||'tone')===c.dataset.beep));
+  if($('#beepName'))$('#beepName').textContent=st.beepName?('用你自己的：'+st.beepName):'';
   $('#swSound').classList.toggle('on',!!st.sound);
   $('#swVibe').classList.toggle('on',!!st.vibrate);
   $('#swOrder').classList.toggle('on',st.cardOrder==='fixed');
@@ -1610,6 +1676,38 @@ if($('#glassRange'))$('#glassRange').addEventListener('input',e=>{
   S.settings.glass=+e.target.value;$('#glassVal').textContent=e.target.value;save();applyGlassTint();
 });
 $('#volRange').addEventListener('input',e=>{S.settings.volume=+e.target.value;$('#volVal').textContent=e.target.value;save();if(S.settings.autoOn){stopAutoBeep();startAutoBeep()}});
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-beep]');if(!c)return;
+  if(c.dataset.beep==='custom'&&!customBuf){toast('先传一段音频进来');return}
+  S.settings.beep=c.dataset.beep;save();renderSettings();stopAutoBeep();if(S.settings.autoOn)startAutoBeep();previewBeep();
+  toast('换成'+(c.textContent||'').trim()+'了');
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('[data-act="previewBeep"]'))return;
+  previewBeep();
+});
+$('#beepFile')&&$('#beepFile').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    try{
+      const c=audio();const arr=r.result;
+      const ab=await c.decodeAudioData(arr.slice(0));
+      customBuf=ab;
+      S.settings.beep='custom';S.settings.beepName=f.name;save();
+      try{await DB.put('beepbuf',arr)}catch(e){}
+      stopAutoBeep();if(S.settings.autoOn)startAutoBeep();renderSettings();previewBeep();
+      toast('节拍音换成你的了');
+    }catch(err){toast('这段音频解不开，换 mp3 或 wav')}
+  };
+  r.readAsArrayBuffer(f);
+});
+(async()=>{
+  try{
+    const ab=await DB.get('beepbuf');
+    if(ab){const c=audio();if(c)customBuf=await c.decodeAudioData(ab.slice(0))}
+  }catch(e){}
+})();
 $('#volRange').addEventListener('change',()=>{if(S.settings.sound)tone(620,.25,'triangle')});
 $('#mask').addEventListener('click',e=>{if(e.target.id==='mask')closeModal()});
 function openModal(html){$('#modal').innerHTML=html;$('#mask').classList.add('on')}
