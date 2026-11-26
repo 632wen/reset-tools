@@ -864,16 +864,43 @@ function renderToday(){
   if($('#tAff'))$('#tAff').textContent=todayTotal();
   if($('#tRel'))$('#tRel').textContent=relDay().count;
 }
-let autoTimer=null;
+let autoTimer=null,autoBeep=null,autoLast=0;
+function stopAutoBeep(){
+  if(autoBeep){try{autoBeep.stop()}catch(e){}try{autoBeep.disconnect()}catch(e){}autoBeep=null}
+}
+function startAutoBeep(){
+  if(autoBeep||!S.settings.sound)return;
+  const c=audio();if(!c)return;
+  const step=Math.max(1,S.settings.autoSec||3);
+  const n=Math.max(64,Math.floor(c.sampleRate*step));
+  const buf=c.createBuffer(1,n,c.sampleRate),d=buf.getChannelData(0);
+  const bl=Math.min(n,Math.floor(c.sampleRate*.18));
+  const amp=(S.settings.volume/100)*.2;
+  for(let i=0;i<bl;i++){
+    const t=i/c.sampleRate;
+    d[i]=Math.sin(2*Math.PI*720*t)*amp*Math.exp(-t*16)*(1-Math.exp(-t*70));
+  }
+  const src=c.createBufferSource();src.buffer=buf;src.loop=true;
+  const g=c.createGain();g.gain.value=1;src.connect(g);g.connect(c.destination);src.start();
+  autoBeep=src;
+}
 function autoTick(){
-  if(!S.settings.autoOn)return;
-  if(curView!=='aff'&&curView!=='focus')return;
-  addCount(1,curView==='focus'?fcat:S.lastCat);
+  if(!S.settings.autoOn){autoLast=0;return}
+  if(!(curView==='aff'||curView==='focus'||document.hidden)){autoLast=0;return}
+  const step=Math.max(1,S.settings.autoSec||3)*1000,now=Date.now();
+  if(!autoLast){autoLast=now;return}
+  let n=Math.floor((now-autoLast)/step);
+  if(n<=0)return;
+  n=Math.min(n,600);
+  autoLast+=n*step;
+  addCount(n,curView==='focus'?fcat:S.lastCat);
 }
 function syncAuto(){
   if(autoTimer){clearInterval(autoTimer);autoTimer=null}
+  stopAutoBeep();autoLast=0;
   if(S.settings.autoOn){
-    autoTimer=setInterval(()=>{if(document.hidden)return;autoTick()},(S.settings.autoSec||3)*1000);
+    autoTimer=setInterval(()=>autoTick(),Math.max(1,S.settings.autoSec||3)*1000);
+    autoLast=Date.now();startAutoBeep();
   }
   if($('#swAuto'))$('#swAuto').classList.toggle('on',!!S.settings.autoOn);
   if($('#autoHint'))$('#autoHint').textContent=S.settings.autoOn?('每 '+(S.settings.autoSec||3)+' 秒 +1'):'';
@@ -1582,7 +1609,7 @@ $('#swUp').addEventListener('click',()=>{S.settings.mode=S.settings.mode==='coun
 if($('#glassRange'))$('#glassRange').addEventListener('input',e=>{
   S.settings.glass=+e.target.value;$('#glassVal').textContent=e.target.value;save();applyGlassTint();
 });
-$('#volRange').addEventListener('input',e=>{S.settings.volume=+e.target.value;$('#volVal').textContent=e.target.value;save()});
+$('#volRange').addEventListener('input',e=>{S.settings.volume=+e.target.value;$('#volVal').textContent=e.target.value;save();if(S.settings.autoOn){stopAutoBeep();startAutoBeep()}});
 $('#volRange').addEventListener('change',()=>{if(S.settings.sound)tone(620,.25,'triangle')});
 $('#mask').addEventListener('click',e=>{if(e.target.id==='mask')closeModal()});
 function openModal(html){$('#modal').innerHTML=html;$('#mask').classList.add('on')}
