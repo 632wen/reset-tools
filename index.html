@@ -322,7 +322,7 @@ iframe#nl-badge-frame,#nl-badge-frame,.nl-badge-root,[id^="nl-badge"],[class^="n
       <div class="plabel" id="affCatLabel" data-act="pickCat" style="cursor:pointer">#自我概念 · 今天 ▾</div>
       <div class="tapPad" id="tapPad"><div class="n" id="affNum">0</div></div>
       <div id="affNow" class="affnow"></div>
-      <div class="mini" id="todayLine">今天总共 <span id="todayAll">0</span> 次</div>
+      <div class="mini" id="todayLine">今天总共 0 次</div>
       <div class="minictrl" style="justify-content:center"><button id="btnMinus">−1 撤销</button><button id="btnResetToday">这一类清零</button></div>
       <div class="autorow"><div><div class="nm" style="font-size:13.5px">自动 +1</div><div class="ds" style="font-size:11px;color:var(--ink-3);margin-top:4px" id="autoHint"></div></div><div class="sw" id="swAuto"></div></div>
       <div class="chips" id="autoChips"></div>
@@ -710,7 +710,9 @@ function startAmbient(kind){
 function stopAmbient(){if(amb){try{amb.src.stop()}catch(e){}amb=null}}
 
 /* 路由 */
+let curView='home';
 function go(v){
+  curView=v;
   $('#hdHome').style.display = v==='home'?'flex':'none';
   $$('.view').forEach(x=>x.classList.remove('on'));
   const el=$('#v-'+v);if(el)el.classList.add('on');
@@ -854,6 +856,10 @@ function catCount(c){return todayCounts()[c]||0}
 function catNum(c){return (S.settings.countMode==='all')?catCountAll(c):catCount(c)}
 function catCountAll(c){return Object.values(S.counts).reduce((a,b)=>a+((b&&b[c])||0),0)}
 function todayTotal(){return Object.values(todayCounts()).reduce((x,y)=>x+(y||0),0)}
+function syncTodayLine(){
+  const el=$('#todayLine');if(!el)return;
+  el.textContent=S.settings.countMode==='all'?('全部加起来 '+totalCount()+' 次'):('今天总共 '+todayTotal()+' 次');
+}
 function renderToday(){
   if($('#tAff'))$('#tAff').textContent=todayTotal();
   if($('#tRel'))$('#tRel').textContent=relDay().count;
@@ -861,7 +867,8 @@ function renderToday(){
 let autoTimer=null;
 function autoTick(){
   if(!S.settings.autoOn)return;
-  addCount(1);
+  if(curView!=='aff'&&curView!=='focus')return;
+  addCount(1,curView==='focus'?fcat:S.lastCat);
 }
 function syncAuto(){
   if(autoTimer){clearInterval(autoTimer);autoTimer=null}
@@ -875,13 +882,14 @@ function syncAuto(){
   if($('#fAutoChips'))$('#fAutoChips').innerHTML=[1,3,5,10,20,30,60].map(v=>'<button class="chip'+((S.settings.autoSec||3)===v?' on':'')+'" data-asec="'+v+'">'+v+' 秒</button>').join('');
   if($('#autoChips'))$('#autoChips').innerHTML=[1,3,5,10,20,30,60].map(v=>'<button class="chip'+((S.settings.autoSec||3)===v?' on':'')+'" data-asec="'+v+'">'+v+' 秒</button>').join('');
 }
-function addCount(n){
+function addCount(n,cat){
+  const c=cat||S.lastCat;
   const d=todayCounts();
-  const v=Math.max(0,(d[S.lastCat]||0)+n);
-  d[S.lastCat]=v;save();
+  const v=Math.max(0,(d[c]||0)+n);
+  d[c]=v;save();
   if($('#affNum'))$('#affNum').textContent=catNum(S.lastCat);
-  if($('#fNum'))$('#fNum').textContent=catNum(S.lastCat);
-  if($('#todayLine'))$('#todayLine').textContent=S.settings.countMode==='all'?('全部加起来 '+totalCount()+' 次'):('今天总共 '+todayTotal()+' 次');
+  if($('#fNum'))$('#fNum').textContent=catNum(fcat);
+  syncTodayLine();
   if(n>0){tone(720,.18);buzz(6)}
   renderToday();
 }
@@ -896,7 +904,7 @@ function renderAffPage(){
   const allMode=S.settings.countMode==='all';
   $('#affCatLabel').textContent='#'+S.lastCat+(allMode?' · 累计':' · 今天')+' ▾';
   $('#affNum').textContent=allMode?catCountAll(S.lastCat):catCount(S.lastCat);
-  $('#todayLine').textContent=allMode?('全部加起来 '+totalCount()+' 次'):('今天总共 '+todayTotal()+' 次');
+  syncTodayLine();
   renderAffNow();
 }
 function catAffs(){return S.affirmations.filter(a=>a.cat===S.lastCat)}
@@ -1009,9 +1017,16 @@ document.addEventListener('click',e=>{
 $('#swAuto').addEventListener('click',()=>{S.settings.autoOn=!S.settings.autoOn;save();syncAuto();toast(S.settings.autoOn?'自动 +1 开了':'自动 +1 停了')});
 $('#autoChips').addEventListener('click',e=>{const c=e.target.closest('[data-asec]');if(!c)return;S.settings.autoSec=+c.dataset.asec;save();syncAuto();toast('每 '+S.settings.autoSec+' 秒加一次')});
 $('#btnResetToday').addEventListener('click',()=>{
-  const d=todayCounts();
-  if(!d[S.lastCat]){toast('这一类今天还是 0');return}
-  d[S.lastCat]=0;save();renderAffPage();toast('#'+S.lastCat+' 今日已清零');
+  const allMode=S.settings.countMode==='all';
+  if(allMode){
+    if(!catCountAll(S.lastCat)){toast('这一类还没有记录');return}
+    Object.keys(S.counts).forEach(k=>{if(S.counts[k]&&S.counts[k][S.lastCat]!=null)S.counts[k][S.lastCat]=0});
+    save();renderAffPage();renderFocus();renderToday();toast('#'+S.lastCat+' 累计已清零');
+  }else{
+    const d=todayCounts();
+    if(!d[S.lastCat]){toast('这一类今天还是 0');return}
+    d[S.lastCat]=0;save();renderAffPage();renderFocus();renderToday();toast('#'+S.lastCat+' 今日已清零');
+  }
 });
 /* 专注 */
 var fcat=S.lastCat||S.cats[0], fsec=0, frunning=false, fstarted=0, ftick=null, ftarget=0;
@@ -1332,15 +1347,13 @@ function ripple(){
     setTimeout(()=>sp.remove(),1200);
   }
 }
-$('#stepDone').addEventListener('click',e=>{
-  if(e.target.closest('[data-rel="again"]')){rel={step:1,emo:'',want:'',q:0,t0:0};renderRelease()}
-});
+
 
 /* 记录 */
 function renderStats(){
   $('#sTotal').textContent=totalCount();
   const fs=Object.values(S.focus).reduce((a,b)=>a+b,0);
-  $('#sFocus').textContent=fs>=3600?(fs/3600).toFixed(1)+' h':Math.round(fs/60)+' 分';
+  $('#sFocus').textContent=fs>=3600?(fs/3600).toFixed(1)+' h':(fs<60?Math.round(fs)+' 秒':Math.round(fs/60)+' 分');
   $('#sRelease').textContent=relTotal();
   let streak=0;
   for(let i=0;i<400;i++){
