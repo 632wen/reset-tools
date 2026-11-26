@@ -379,7 +379,7 @@ iframe#nl-badge-frame,#nl-badge-frame,.nl-badge-root,[id^="nl-badge"],[class^="n
     <div class="panel glass pad">
       <div class="fcur" id="fCur"></div>
       <div class="plabel" style="text-align:center">#<span id="fCatName">自我概念</span></div>
-      <div class="tapPad" id="fTap"><div class="n" id="fNum">0</div><div class="tapHint">轻触 +1 次</div></div>
+      <div class="tapPad" id="fTap"><div class="n" id="fNum">0</div><div class="tapHint">轻触 +1 次<span id="fNumMode" style="margin-left:6px;opacity:.75"></span></div></div>
       <div class="autorow" style="margin-top:14px"><div><div class="nm" style="font-size:13.5px">自动 +1</div><div class="ds" id="fAutoHint" style="font-size:11px;color:var(--ink-3);margin-top:4px"></div></div><div class="sw" id="fSwAuto"></div></div>
       <div class="chips" id="fAutoChips" style="margin-top:10px"></div>
       <div class="addrow" style="margin-top:10px">
@@ -851,6 +851,7 @@ async function loadCustomFont(){
 function todayCounts(){const k=todayKey();if(!S.counts[k])S.counts[k]={};return S.counts[k]}
 function totalCount(){return Object.values(S.counts).reduce((x,b)=>x+Object.values(b).reduce((y,z)=>y+(z||0),0),0)}
 function catCount(c){return todayCounts()[c]||0}
+function catNum(c){return (S.settings.countMode==='all')?catCountAll(c):catCount(c)}
 function catCountAll(c){return Object.values(S.counts).reduce((a,b)=>a+((b&&b[c])||0),0)}
 function todayTotal(){return Object.values(todayCounts()).reduce((x,y)=>x+(y||0),0)}
 function renderToday(){
@@ -878,8 +879,8 @@ function addCount(n){
   const d=todayCounts();
   const v=Math.max(0,(d[S.lastCat]||0)+n);
   d[S.lastCat]=v;save();
-  if($('#affNum'))$('#affNum').textContent=v;
-  if($('#fNum'))$('#fNum').textContent=v;
+  if($('#affNum'))$('#affNum').textContent=catNum(S.lastCat);
+  if($('#fNum'))$('#fNum').textContent=catNum(S.lastCat);
   if($('#todayLine'))$('#todayLine').textContent=S.settings.countMode==='all'?('全部加起来 '+totalCount()+' 次'):('今天总共 '+todayTotal()+' 次');
   if(n>0){tone(720,.18);buzz(6)}
   renderToday();
@@ -997,7 +998,7 @@ $('#affNum').addEventListener('click',e=>{e.stopPropagation();addCount(1)});
 $('#btnMinus').addEventListener('click',()=>addCount(-1));
 $('#countModeChips').addEventListener('click',e=>{
   const c=e.target.closest('[data-cmode]');if(!c)return;
-  S.settings.countMode=c.dataset.cmode;save();renderSettings();renderAffPage();toast(c.dataset.cmode==='all'?'改成看累计了':'改成看今日了');
+  S.settings.countMode=c.dataset.cmode;save();renderSettings();renderAffPage();renderFocus();toast(c.dataset.cmode==='all'?'改成看累计了':'改成看今日了');
 });
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act="autoSet"]');if(!b)return;
@@ -1027,7 +1028,8 @@ function renderFocus(){
   const fcur=$('#fCur');
   if(fcur){const c=S.currentAff?S.affirmations.find(a=>a.id===S.currentAff):null;
     fcur.textContent=c?('“'+c.text+'”'):'';}
-  $('#fNum').textContent=todayCounts()[fcat]||0;
+  $('#fNum').textContent=catNum(fcat);
+  $('#fNumMode').textContent=(S.settings.countMode==='all')?'累计':'';
   $('#fCats').innerHTML=S.cats.map(c=>'<button class="chip'+(c===fcat?' on':'')+'" data-fcat="'+c+'">#'+c+'</button>').join('');
   const list=S.affirmations.filter(a=>a.cat===fcat);
   $('#fAffs').innerHTML=list.length?list.map(a=>{
@@ -1066,7 +1068,7 @@ $('#fCats').addEventListener('click',e=>{
 });
 $('#fTap').addEventListener('click',()=>{
   const d=todayCounts();d[fcat]=(d[fcat]||0)+1;save();
-  $('#fNum').textContent=d[fcat];renderToday();tone(720,.15);buzz(5);
+  $('#fNum').textContent=catNum(fcat);renderToday();renderAffPage();tone(720,.15);buzz(5);
 });
 $('#fStart').addEventListener('click',()=>{
   if(frunning){fsec+=(Date.now()-fstarted)/1000;frunning=false;clearInterval(ftick);ftick=null;renderFocus();return}
